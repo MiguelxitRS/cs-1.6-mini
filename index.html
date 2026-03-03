@@ -1,1 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 1.6 MINI - VERSÃO SIMPLES</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
 
+        body {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #game-container {
+            position: relative;
+            width: 900px;
+            height: 600px;
+            border: 3px solid #ffd700;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #canvas-3d {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111;
+            display: block;
+        }
+
+        /* HUD simples */
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            z-index: 10;
+        }
+
+        #instrucoes {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        #botao-iniciar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 0 20px #ffd700;
+        }
+
+        #botao-iniciar:hover {
+            background: #ffed4a;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        #status {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 18px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 1px solid #ffd700;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="canvas-3d"></canvas>
+        
+        <div id="hud">
+            <div>Posição: <span id="pos-x">300</span>, <span id="pos-y">300</span></div>
+            <div>Ângulo: <span id="angulo">0</span></div>
+            <div>Pontos: <span id="pontos">0</span></div>
+        </div>
+
+        <div id="status">🚀 Clique no botão para começar</div>
+        <div id="instrucoes">WASD = Andar | Mouse = Olhar | Clique = Atirar</div>
+        
+        <button id="botao-iniciar" onclick="iniciarJogo()">🎮 ENTRAR NO JOGO</button>
+    </div>
+
+    <script>
+        // Configuração básica
+        const canvas = document.getElementById('canvas-3d');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = 900;
+        canvas.height = 600;
+
+        // Jogador
+        let player = {
+            x: 300,
+            y: 300,
+            angulo: 0,
+            velocidade: 3,
+            pontos: 0
+        };
+
+        // Controles
+        let teclas = {};
+        let mouseTravado = false;
+        let jogoAtivo = false;
+
+        // Mapa simples (1 = parede)
+        const mapa = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        const TAMANHO_CELULA = 40;
+        const MAPA_TAMANHO = 16;
+
+        // Iniciar jogo
+        function iniciarJogo() {
+            document.getElementById('botao-iniciar').style.display = 'none';
+            document.getElementById('status').innerHTML = '🎯 Mouse travado! Use WASD e mouse';
+            
+            canvas.requestPointerLock();
+            mouseTravado = true;
+            jogoAtivo = true;
+        }
+
+        // Eventos de teclado
+        document.addEventListener('keydown', (e) => {
+            teclas[e.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            teclas[e.key.toLowerCase()] = false;
+        });
+
+        // Eventos do mouse
+        document.addEventListener('mousemove', (e) => {
+            if (!jogoAtivo || !mouseTravado) return;
+            
+            // Movimenta a câmera com o mouse
+            player.angulo += e.movementX * 0.005;
+        });
+
+        canvas.addEventListener('click', () => {
+            if (!jogoAtivo) return;
+            
+            // Tiro
+            player.pontos += 10;
+            document.getElementById('pontos').innerHTML = player.pontos;
+            
+            // Feedback visual
+            ctx.fillStyle = '#ffff00';
+            ctx.fillRect(450, 300, 10, 10);
+            setTimeout(() => {}, 50);
+        });
+
+        // Sair do mouse travado com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mouseTravado) {
+                document.exitPointerLock();
+                mouseTravado = false;
+                jogoAtivo = false;
+                document.getElementById('botao-iniciar').style.display = 'block';
+                document.getElementById('status').innerHTML = '🚀 Clique no botão para começar';
+            }
+        });
+
+        // Movimento do jogador
+        function moverJogador() {
+            if (!jogoAtivo || !mouseTravado) return;
+
+            let novoX = player.x;
+            let novoY = player.y;
+
+            if (teclas['w']) {
+                novoX += Math.cos(player.angulo) * player.velocidade;
+                novoY += Math.sin(player.angulo) * player.velocidade;
+            }
+            if (teclas['s']) {
+                novoX -= Math.cos(player.angulo) * player.velocidade;
+                novoY -= Math.sin(player.angulo) * player.velocidade;
+            }
+            if (teclas['a']) {
+                novoX += Math.cos(player.angulo - Math.PI/2) * player.velocidade;
+                novoY += Math.sin(player.angulo - Math.PI/2) * player.velocidade;
+            }
+            if (teclas['d']) {
+                novoX += Math.cos(player.angulo + Math.PI/2) * player.velocidade;
+                novoY += Math.sin(player.angulo + Math.PI/2) * player.velocidade;
+            }
+
+            // Colisão com paredes
+            const mapaX = Math.floor(novoX / TAMANHO_CELULA);
+            const mapaY = Math.floor(novoY / TAMANHO_CELULA);
+
+            if (mapa[mapaY] && mapa[mapaY][mapaX] !== 1) {
+                player.x = novoX;
+                player.y = novoY;
+            }
+
+            // Atualizar HUD
+            document.getElementById('pos-x').innerHTML = Math.round(player.x);
+            document.getElementById('pos-y').innerHTML = Math.round(player.y);
+            document.getElementById('angulo').innerHTML = Math.round(player.angulo * 180 / Math.PI);
+        }
+
+        // Renderização 3D simples
+        function renderizar() {
+            // Limpar tela
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, 900, 600);
+
+            // Céu e chão
+            ctx.fillStyle = '#1a3355';
+            ctx.fillRect(0, 0, 900, 300);
+            ctx.fillStyle = '#553322';
+            ctx.fillRect(0, 300, 900, 300);
+
+            const FOV = Math.PI / 3;
+            const NUM_RAIOS = 300;
+
+            for (let i = 0; i < NUM_RAIOS; i++) {
+                const anguloRaio = player.angulo - FOV/2 + (i / NUM_RAIOS) * FOV;
+                
+                let distancia = 0;
+                let hit = false;
+                
+                while (!hit && distancia < 800) {
+                    distancia += 5;
+                    
+                    const raioX = player.x + Math.cos(anguloRaio) * distancia;
+                    const raioY = player.y + Math.sin(anguloRaio) * distancia;
+                    
+                    const mapaX = Math.floor(raioX / TAMANHO_CELULA);
+                    const mapaY = Math.floor(raioY / TAMANHO_CELULA);
+                    
+                    if (mapaX < 0 || mapaX >= MAPA_TAMANHO || mapaY < 0 || mapaY >= MAPA_TAMANHO) {
+                        hit = true;
+                    } else if (mapa[mapaY][mapaX] === 1) {
+                        hit = true;
+                    }
+                }
+                
+                // Corrigir distorção
+                const distanciaCorrigida = distancia * Math.cos(anguloRaio - player.angulo);
+                
+                // Altura da parede
+                const alturaParede = Math.min(600, (TAMANHO_CELULA * 600) / Math.max(distanciaCorrigida, 1));
+                
+                // Cor baseada na distância
+                const brilho = Math.max(50, 255 - Math.min(200, distancia / 2));
+                
+                // Desenhar coluna
+                ctx.fillStyle = `rgb(${brilho}, ${brilho/2}, ${brilho/4})`;
+                ctx.fillRect(i * 3, 300 - alturaParede/2, 3, alturaParede);
+            }
+
+            // Desenhar mira
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(445, 295);
+            ctx.lineTo(455, 305);
+            ctx.moveTo(455, 295);
+            ctx.lineTo(445, 305);
+            ctx.stroke();
+        }
+
+        // Game loop
+        function gameLoop() {
+            moverJogador();
+            renderizar();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
