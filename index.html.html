@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini CS 1.6 - Primeira Pessoa (FPS)</title>
+    <title>CS 1.6 MOD - Aim.cfg Edition</title>
     <style>
         * {
             margin: 0;
@@ -13,35 +13,37 @@
         }
 
         body {
-            background: #000;
+            background: #0a0f0f;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
         }
 
         #game-container {
             position: relative;
-            width: 900px;
-            height: 600px;
-            border: 3px solid #5a4e3e;
-            border-radius: 8px;
+            width: 1024px;
+            height: 768px;
+            border: 3px solid #ff4444;
+            border-radius: 0px;
             overflow: hidden;
+            box-shadow: 0 0 30px #ff444488;
         }
 
-        /* Canvas 3D principal */
         #canvas-3d {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #111;
+            background: #1a1e2a;
             display: block;
+            image-rendering: crisp-edges;
         }
 
-        /* HUD sobreposto */
+        /* HUD estilo competitivo */
         #hud {
             position: absolute;
             top: 10px;
@@ -49,35 +51,130 @@
             right: 10px;
             display: flex;
             justify-content: space-between;
-            color: #ffd700;
+            color: #fff;
             text-shadow: 2px 2px 0 #000;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             z-index: 20;
             pointer-events: none;
+            font-family: 'Courier New', monospace;
         }
 
         .hud-item {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: 1px solid #5a4e3e;
-            backdrop-filter: blur(2px);
+            background: rgba(20, 20, 30, 0.85);
+            padding: 6px 12px;
+            border-left: 3px solid #ff4444;
+            border-right: 1px solid #444;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         #health {
-            color: #ff4444;
+            color: #ff8888;
+        }
+
+        #armor {
+            color: #88aaff;
         }
 
         #ammo {
-            color: #ffd700;
+            color: #ffff88;
         }
 
         #score {
-            color: #44ff44;
+            color: #88ff88;
         }
 
-        /* Mira central */
+        #timer {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #ff4444;
+            padding: 5px 20px;
+            border: 2px solid #ff4444;
+            font-size: 28px;
+            font-weight: bold;
+            z-index: 21;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 3px;
+        }
+
+        #kill-feed {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 21;
+            max-width: 350px;
+            text-align: right;
+        }
+
+        .kill-feed-item {
+            background: rgba(30, 30, 40, 0.9);
+            padding: 6px 12px;
+            margin-bottom: 4px;
+            border-right: 4px solid #ff4444;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-shadow: 1px 1px 0 #000;
+            animation: fadeOut 4s forwards;
+            border-left: 2px solid #444;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateX(0); }
+            70% { opacity: 1; transform: translateX(0); }
+            100% { opacity: 0; transform: translateX(20px); }
+        }
+
+        #radar {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 180px;
+            height: 180px;
+            background: rgba(0, 20, 20, 0.9);
+            border: 2px solid #ff4444;
+            z-index: 35;
+            overflow: hidden;
+        }
+
+        #radar canvas {
+            width: 100%;
+            height: 100%;
+            filter: contrast(1.2);
+        }
+
+        #radar-label {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #ff4444;
+            font-size: 10px;
+            z-index: 36;
+            text-shadow: 1px 1px 0 #000;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 5px;
+        }
+
+        #weapon-info {
+            position: absolute;
+            bottom: 20px;
+            left: 220px;
+            color: #fff;
+            background: rgba(20,20,30,0.9);
+            padding: 8px 15px;
+            border-left: 3px solid #ff4444;
+            font-size: 16px;
+            z-index: 25;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         #crosshair {
             position: absolute;
             top: 50%;
@@ -89,10 +186,11 @@
             pointer-events: none;
         }
 
+        /* Mira estilo Aim.cfg (colorida) */
         .crosshair-line {
             position: absolute;
-            background: #ffffff;
-            box-shadow: 0 0 5px #ff0000;
+            background: #44ff88;
+            box-shadow: 0 0 5px #00ff00;
         }
 
         .crosshair-line.vertical {
@@ -100,6 +198,8 @@
             height: 20px;
             left: 19px;
             top: 10px;
+            background: #ff44ff;
+            box-shadow: 0 0 8px #ff44ff;
         }
 
         .crosshair-line.horizontal {
@@ -107,484 +207,374 @@
             height: 2px;
             top: 19px;
             left: 10px;
+            background: #44ff88;
+            box-shadow: 0 0 8px #44ff88;
         }
 
         .crosshair-dot {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #ff0000;
-            border-radius: 50%;
-            top: 18px;
-            left: 18px;
-            box-shadow: 0 0 5px #ff0000;
+            width: 6px;
+            height: 6px;
+            background: #ffaa44;
+            border-radius: 0;
+            top: 17px;
+            left: 17px;
+            box-shadow: 0 0 10px #ffaa44;
         }
 
-        /* Arma na mão */
         #weapon {
             position: absolute;
-            bottom: 10px;
-            right: 20px;
-            width: 300px;
-            height: 200px;
+            bottom: 20px;
+            right: 30px;
+            width: 350px;
+            height: 250px;
             z-index: 25;
             pointer-events: none;
-            image-rendering: pixelated;
-            transform-origin: bottom right;
-            transition: transform 0.1s;
+            image-rendering: crisp-edges;
+            filter: drop-shadow(0 0 10px #000);
+        }
+
+        #weapon canvas {
+            width: 100%;
+            height: 100%;
         }
 
         #weapon.shoot {
-            transform: scale(0.95) translateX(5px) translateY(5px);
+            animation: shootAnim 0.08s ease-out;
+        }
+
+        @keyframes shootAnim {
+            0% { transform: scale(1) translateX(0); }
+            30% { transform: scale(0.98) translateX(3px) translateY(3px); }
+            100% { transform: scale(1) translateX(0); }
         }
 
         #weapon.reload {
-            animation: weaponReload 0.5s ease;
+            animation: reloadAnim 0.6s ease;
         }
 
-        @keyframes weaponReload {
+        @keyframes reloadAnim {
             0% { transform: rotate(0deg); }
-            30% { transform: rotate(-10deg) translateX(-10px); }
-            70% { transform: rotate(5deg) translateX(5px); }
+            20% { transform: rotate(-8deg) translateX(-10px); }
+            60% { transform: rotate(6deg) translateX(8px); }
             100% { transform: rotate(0deg); }
         }
 
-        /* Mini-map */
-        #minimap {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 150px;
-            height: 150px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 2px solid #5a4e3e;
-            border-radius: 4px;
-            z-index: 35;
-            color: white;
-            font-size: 10px;
-            padding: 5px;
-            pointer-events: none;
-        }
-
-        #minimap canvas {
-            width: 100%;
-            height: 100%;
-            image-rendering: pixelated;
-        }
-
-        #instructions {
-            position: absolute;
-            bottom: 10px;
-            left: 170px;
-            color: #aaa;
-            font-size: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            z-index: 20;
-        }
-
-        #restart-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: #5a4e3e;
-            color: #ffd700;
-            border: 1px solid #ffd700;
-            padding: 5px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 40;
-        }
-
-        #restart-btn:hover {
-            background: #6b5e4e;
-        }
-
-        #kill-message {
-            position: absolute;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ffd700;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #000, 0 0 10px #ff0000;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 50;
-            pointer-events: none;
-        }
-
-        #kill-message.show {
-            opacity: 1;
-            animation: killFlash 0.5s ease;
-        }
-
-        @keyframes killFlash {
-            0% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.2); }
-            100% { transform: translateX(-50%) scale(1); }
-        }
-
-        /* Botão de pausa */
-        #pause-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: #ffd700;
-            border: 1px solid #ffd700;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 45;
-            font-size: 14px;
-        }
-
-        #pause-btn:hover {
-            background: #5a4e3e;
-        }
-
-        /* Menu de pausa */
-        #pause-menu {
+        #blood-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(180, 0, 0, 0);
+            pointer-events: none;
+            z-index: 45;
+            transition: background 0.1s;
+        }
+
+        #blood-overlay.hit {
+            background: rgba(180, 0, 0, 0.3);
+        }
+
+        #stats {
+            position: absolute;
+            top: 120px;
+            left: 20px;
+            color: #88ff88;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-left: 3px solid #88ff88;
+            font-size: 14px;
+            z-index: 21;
+            line-height: 1.8;
+        }
+
+        #damage-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff8888;
+            font-size: 32px;
+            font-weight: bold;
+            opacity: 0;
+            z-index: 46;
+            pointer-events: none;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        #fps-counter {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: #88ff88;
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            font-size: 12px;
+            z-index: 50;
+            font-family: monospace;
+        }
+
+        #menu-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.95);
             z-index: 100;
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(5px);
         }
 
-        .menu-content {
-            background: #1a1f2a;
-            border: 3px solid #5a4e3e;
-            border-radius: 8px;
-            padding: 30px;
-            width: 400px;
-            color: #ffd700;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-        }
-
-        .menu-content h2 {
+        .menu-box {
+            background: #1a1e2a;
+            border: 3px solid #ff4444;
+            padding: 40px;
+            width: 500px;
             text-align: center;
-            margin-bottom: 25px;
-            font-size: 28px;
+        }
+
+        .menu-box h1 {
+            color: #ff4444;
+            font-size: 48px;
+            margin-bottom: 20px;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #5a4e3e;
-            padding-bottom: 10px;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px #ff4444;
         }
 
-        .menu-section {
-            margin-bottom: 25px;
-        }
-
-        .menu-section h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .setting-item {
-            margin-bottom: 15px;
-        }
-
-        .setting-item label {
-            display: block;
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .setting-item input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
-            -webkit-appearance: none;
-        }
-
-        .setting-item input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 15px;
-            height: 15px;
-            background: #ffd700;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .setting-item input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-
-        .setting-value {
-            float: right;
-            color: #ffd700;
-        }
-
-        .menu-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
+        .menu-box h2 {
+            color: #88ff88;
+            font-size: 24px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
         }
 
         .menu-btn {
-            flex: 1;
-            background: #5a4e3e;
-            color: #ffd700;
-            border: 1px solid #ffd700;
-            padding: 10px;
-            border-radius: 4px;
+            background: transparent;
+            color: #fff;
+            border: 2px solid #ff4444;
+            padding: 15px 30px;
+            font-size: 20px;
+            margin: 10px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             transition: all 0.2s;
+            width: 250px;
         }
 
         .menu-btn:hover {
-            background: #6b5e4e;
-            transform: scale(1.02);
+            background: #ff4444;
+            color: #000;
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff4444;
         }
 
-        .menu-btn.primary {
-            background: #ffd700;
-            color: #1a1f2a;
-        }
-
-        .menu-btn.primary:hover {
-            background: #ffed4a;
-        }
-
-        /* Indicador de pausa */
-        #pause-indicator {
+        .config-panel {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #ffd700;
-            font-size: 48px;
-            font-weight: bold;
-            text-shadow: 0 0 20px #000;
-            z-index: 90;
+            background: #1a1e2a;
+            border: 3px solid #88ff88;
+            padding: 30px;
+            width: 400px;
             display: none;
-            pointer-events: none;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        /* Notificação de salvamento */
-        #save-notification {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: #44ff44;
-            padding: 10px 20px;
-            border-radius: 4px;
-            border: 1px solid #44ff44;
-            font-weight: bold;
             z-index: 200;
-            display: none;
-            animation: fadeInOut 2s ease;
         }
 
-        @keyframes fadeInOut {
-            0% { opacity: 0; bottom: 60px; }
-            20% { opacity: 1; bottom: 80px; }
-            80% { opacity: 1; bottom: 80px; }
-            100% { opacity: 0; bottom: 100px; }
+        .config-panel h3 {
+            color: #88ff88;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .config-item {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .config-item label {
+            color: #aaa;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .config-item input {
+            width: 100%;
+            padding: 8px;
+            background: #0a0f0f;
+            border: 1px solid #ff4444;
+            color: #fff;
+        }
+
+        #hitmarker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 24px;
+            opacity: 0;
+            z-index: 47;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- Canvas 3D -->
         <canvas id="canvas-3d"></canvas>
         
-        <!-- HUD -->
+        <div id="blood-overlay"></div>
+        <div id="damage-indicator">+100</div>
+        <div id="hitmarker">✖</div>
+        
         <div id="hud">
             <div class="hud-item" id="health">❤️ 100</div>
-            <div class="hud-item" id="ammo">🔫 30/90</div>
+            <div class="hud-item" id="armor">🛡️ 100</div>
+            <div class="hud-item" id="ammo">30/90</div>
             <div class="hud-item" id="score">🏆 0</div>
         </div>
 
-        <!-- Mira -->
+        <div id="timer">01:45</div>
+        <div id="kill-feed"></div>
+        <div id="stats">
+            KILLS: <span id="kills">0</span><br>
+            HEADSHOTS: <span id="headshots">0</span><br>
+            ACC: <span id="accuracy">0</span>%
+        </div>
+
+        <div id="radar">
+            <canvas id="radar-canvas" width="180" height="180"></canvas>
+        </div>
+        <div id="radar-label">⚡ AIM.CFG EDITION ⚡</div>
+
+        <div id="weapon-info">⚡ AK-47 | CUSTOM SKIN ⚡</div>
+
         <div id="crosshair">
             <div class="crosshair-line vertical"></div>
             <div class="crosshair-line horizontal"></div>
             <div class="crosshair-dot"></div>
         </div>
 
-        <!-- Arma na mão -->
-        <canvas id="weapon" width="300" height="200"></canvas>
-
-        <!-- Mini-map -->
-        <div id="minimap">
-            <canvas id="minimap-canvas" width="150" height="150"></canvas>
+        <div id="weapon">
+            <canvas id="weapon-canvas" width="350" height="250"></canvas>
         </div>
 
-        <!-- Instruções -->
-        <div id="instructions">WASD = Mover | Mouse = Olhar | Clique = Atirar | R = Recarregar | ESC = Pausa</div>
+        <div id="fps-counter">FPS: <span id="fps">0</span></div>
 
-        <!-- Botão de pausa -->
-        <button id="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
-
-        <!-- Botão reiniciar -->
-        <button id="restart-btn" onclick="restartGame()">NOVA PARTIDA</button>
-
-        <!-- Mensagem de kill -->
-        <div id="kill-message">🔫 HEADSHOT!</div>
-
-        <!-- Indicador de pausa -->
-        <div id="pause-indicator">⏸️ PAUSA</div>
-
-        <!-- Notificação de salvamento -->
-        <div id="save-notification">✅ CONFIGURAÇÕES SALVAS!</div>
-
-        <!-- Menu de pausa -->
-        <div id="pause-menu">
-            <div class="menu-content">
-                <h2>⚙️ CONFIGURAÇÕES</h2>
-                
-                <div class="menu-section">
-                    <h3>🎮 CONTROLES</h3>
-                    <div class="setting-item">
-                        <label>Sensibilidade do Mouse <span id="sens-value" class="setting-value">2.0</span></label>
-                        <input type="range" id="mouse-sens" min="0.5" max="10" value="2" step="0.5" oninput="updateSettingDisplay('sens', this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label>Velocidade do Jogador <span id="speed-value" class="setting-value">3.0</span></label>
-                        <input type="range" id="player-speed" min="1" max="8" value="3" step="0.5" oninput="updateSettingDisplay('speed', this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="invert-mouse" onchange="updateCheckboxDisplay('invert')">
-                            Inverter Mouse Y
-                        </label>
-                    </div>
-                </div>
-
-                <div class="menu-section">
-                    <h3>🔊 ÁUDIO</h3>
-                    <div class="setting-item">
-                        <label>Volume Geral <span id="volume-value" class="setting-value">70%</span></label>
-                        <input type="range" id="master-volume" min="0" max="100" value="70" oninput="updateSettingDisplay('volume', this.value)">
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="sfx-enabled" checked onchange="updateCheckboxDisplay('sfx')">
-                            Efeitos Sonoros
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="music-enabled" checked onchange="updateCheckboxDisplay('music')">
-                            Música
-                        </label>
-                    </div>
-                </div>
-
-                <div class="menu-section">
-                    <h3>🎨 VÍDEO</h3>
-                    <div class="setting-item">
-                        <label>Qualidade Gráfica</label>
-                        <select id="graphics-quality" style="width:100%; padding:5px; background:#333; color:#ffd700; border:1px solid #5a4e3e;" onchange="updateSelectDisplay('quality', this.value)">
-                            <option value="low">Baixa</option>
-                            <option value="medium" selected>Média</option>
-                            <option value="high">Alta</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="show-crosshair" checked onchange="updateCheckboxDisplay('crosshair')">
-                            Mostrar Mira
-                        </label>
-                    </div>
-                    <div class="setting-item">
-                        <label>
-                            <input type="checkbox" id="show-minimap" checked onchange="updateCheckboxDisplay('minimap')">
-                            Mostrar Mini-map
-                        </label>
-                    </div>
-                </div>
-
-                <div class="menu-buttons">
-                    <button class="menu-btn primary" onclick="saveSettings()">SALVAR</button>
-                    <button class="menu-btn" onclick="loadSettings()">CARREGAR</button>
-                    <button class="menu-btn" onclick="resetToDefaults()">PADRÃO</button>
-                    <button class="menu-btn" onclick="togglePause()">VOLTAR</button>
-                </div>
+        <div id="menu-overlay">
+            <div class="menu-box">
+                <h1>CS 1.6 MOD</h1>
+                <h2>AIM.CFG EDITION</h2>
+                <button class="menu-btn" onclick="startGame()">▶ INICIAR JOGO</button>
+                <button class="menu-btn" onclick="openConfig()">⚙ CONFIG</button>
+                <button class="menu-btn" onclick="window.location.reload()">🔄 SKINS</button>
             </div>
+        </div>
+
+        <div id="config-panel" class="config-panel">
+            <h3>⚙ AIM.CFG SETTINGS</h3>
+            <div class="config-item">
+                <label>SENSIBILIDADE:</label>
+                <input type="range" id="sens" min="0.5" max="5" value="2.5" step="0.1">
+            </div>
+            <div class="config-item">
+                <label>COR DA MIRA:</label>
+                <select id="crosshair-color">
+                    <option value="#44ff88">VERDE</option>
+                    <option value="#ff44ff">ROSA</option>
+                    <option value="#44aaff">AZUL</option>
+                    <option value="#ffaa44">LARANJA</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>MODELO DO JOGADOR:</label>
+                <select id="player-skin">
+                    <option value="default">DEFAULT</option>
+                    <option value="blue">BLUE ESL</option>
+                    <option value="red">RED ESL</option>
+                    <option value="pink">HELLO KITTY</option>
+                </select>
+            </div>
+            <div class="config-item">
+                <label>SKIN DA ARMA:</label>
+                <select id="weapon-skin">
+                    <option value="default">DEFAULT</option>
+                    <option value="blue">BLUE METAL</option>
+                    <option value="gold">GOLD</option>
+                    <option value="camo">CAMO</option>
+                </select>
+            </div>
+            <button class="menu-btn" onclick="applyConfig()" style="width:100%;">APLICAR</button>
+            <button class="menu-btn" onclick="closeConfig()" style="width:100%;margin-top:10px;">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        // Configuração do canvas 3D
+        // Configuração inicial
         const canvas = document.getElementById('canvas-3d');
         const ctx = canvas.getContext('2d');
-        const weaponCanvas = document.getElementById('weapon');
+        const weaponCanvas = document.getElementById('weapon-canvas');
         const weaponCtx = weaponCanvas.getContext('2d');
-        const minimapCanvas = document.getElementById('minimap-canvas');
-        const minimapCtx = minimapCanvas.getContext('2d');
+        const radarCanvas = document.getElementById('radar-canvas');
+        const radarCtx = radarCanvas.getContext('2d');
 
-        // Dimensões
-        const WIDTH = 900;
-        const HEIGHT = 600;
+        const WIDTH = 1024;
+        const HEIGHT = 768;
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
 
-        // Configurações padrão
-        const DEFAULT_SETTINGS = {
-            mouseSensitivity: 2.0,
-            playerSpeed: 3.0,
-            invertMouse: false,
-            masterVolume: 70,
-            sfxEnabled: true,
-            musicEnabled: true,
-            graphicsQuality: 'medium',
-            showCrosshair: true,
-            showMinimap: true
+        // Estatísticas
+        let stats = {
+            kills: 0,
+            headshots: 0,
+            shotsFired: 0,
+            shotsHit: 0
         };
 
-        // Carregar configurações salvas ou usar padrão
-        let settings = loadSettingsFromStorage();
+        // Configurações
+        let config = {
+            sens: 2.5,
+            crosshairColor: '#44ff88',
+            playerSkin: 'default',
+            weaponSkin: 'default'
+        };
 
         // Jogador
         let player = {
-            x: 300,
-            y: 300,
+            x: 400,
+            y: 400,
             angle: 0,
-            speed: settings.playerSpeed,
+            speed: 4,
             health: 100,
+            armor: 100,
             score: 0,
-            ammo: 30,
-            reserveAmmo: 90,
-            maxAmmo: 30
+            kills: 0,
+            currentWeapon: 'ak47',
+            weapons: {
+                ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 38, name: 'AK-47' },
+                awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 115, name: 'AWP' },
+                deagle: { ammo: 7, reserve: 35, maxAmmo: 7, damage: 65, name: 'DEAGLE' }
+            }
         };
 
-        // Estado do jogo
-        let gamePaused = false;
-        let gameActive = true;
-        let lastMouseX = 0;
+        // Inimigos (agora com skins coloridas)
+        let enemies = [];
+        let lastShot = 0;
+        const SHOT_COOLDOWN = 120; // Mais rápido (aim.cfg)
+        let gameActive = false;
+        let gamePaused = true;
+        const keys = {};
 
-        // Mapa (1 = parede, 2 = inimigo, 0 = vazio)
+        // Mapa estilo competitivo
         const MAP_SIZE = 16;
-        const CELL_SIZE = 40;
+        const CELL_SIZE = 48;
         const map = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -593,7 +583,7 @@
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,2,0,0,0,0,2,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1],
             [1,0,0,0,0,2,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -604,9 +594,18 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        // Inimigos
-        let enemies = [];
-        
+        const mapTemplate = JSON.parse(JSON.stringify(map));
+
+        // ===== SKINS PERSONALIZADAS =====
+        function getEnemyColor(team) {
+            switch(config.playerSkin) {
+                case 'blue': return '#44aaff';
+                case 'red': return '#ff4444';
+                case 'pink': return '#ff88cc';
+                default: return team === 'TR' ? '#ff5555' : '#44aaff';
+            }
+        }
+
         function loadEnemies() {
             enemies = [];
             for (let y = 0; y < MAP_SIZE; y++) {
@@ -617,7 +616,8 @@
                             y: y * CELL_SIZE + CELL_SIZE/2,
                             health: 100,
                             alive: true,
-                            type: 'terrorist'
+                            team: 'TR',
+                            skin: getEnemyColor('TR')
                         });
                     }
                 }
@@ -625,317 +625,259 @@
         }
         loadEnemies();
 
-        // ========== FUNÇÕES DE CONFIGURAÇÃO ==========
-
-        // Salvar configurações no localStorage
-        function saveSettingsToStorage() {
-            localStorage.setItem('cs16_settings', JSON.stringify(settings));
-        }
-
-        // Carregar configurações do localStorage
-        function loadSettingsFromStorage() {
-            const saved = localStorage.getItem('cs16_settings');
-            if (saved) {
-                try {
-                    return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
-                } catch (e) {
-                    return DEFAULT_SETTINGS;
-                }
+        // ===== ARMA COM SKIN =====
+        function drawWeapon() {
+            weaponCtx.clearRect(0, 0, 350, 250);
+            
+            const skin = config.weaponSkin;
+            
+            // Corpo da arma
+            if (skin === 'blue') {
+                weaponCtx.fillStyle = '#2a6f9c';
+                weaponCtx.fillRect(150, 150, 120, 20);
+                weaponCtx.fillStyle = '#1a4f7c';
+                weaponCtx.fillRect(230, 140, 30, 40);
+                weaponCtx.fillStyle = '#3a8fbc';
+                weaponCtx.fillRect(100, 140, 60, 40);
+            } else if (skin === 'gold') {
+                weaponCtx.fillStyle = '#d4a017';
+                weaponCtx.fillRect(150, 150, 120, 20);
+                weaponCtx.fillStyle = '#b4840f';
+                weaponCtx.fillRect(230, 140, 30, 40);
+                weaponCtx.fillStyle = '#f4c430';
+                weaponCtx.fillRect(100, 140, 60, 40);
+            } else if (skin === 'camo') {
+                weaponCtx.fillStyle = '#5f7345';
+                weaponCtx.fillRect(150, 150, 120, 20);
+                weaponCtx.fillStyle = '#4a5a37';
+                weaponCtx.fillRect(230, 140, 30, 40);
+                weaponCtx.fillStyle = '#7a9453';
+                weaponCtx.fillRect(100, 140, 60, 40);
+            } else {
+                weaponCtx.fillStyle = '#333';
+                weaponCtx.fillRect(150, 150, 120, 20);
+                weaponCtx.fillStyle = '#555';
+                weaponCtx.fillRect(230, 140, 30, 40);
+                weaponCtx.fillStyle = '#666';
+                weaponCtx.fillRect(100, 140, 60, 40);
             }
-            return DEFAULT_SETTINGS;
+            
+            // Detalhes (sempre dourados)
+            weaponCtx.fillStyle = '#ffd700';
+            weaponCtx.fillRect(200, 130, 8, 8);
+            weaponCtx.fillStyle = '#222';
+            weaponCtx.fillRect(260, 145, 25, 8);
         }
 
-        // Atualizar display dos sliders
-        function updateSettingDisplay(type, value) {
-            if (type === 'sens') {
-                document.getElementById('sens-value').textContent = parseFloat(value).toFixed(1);
-            } else if (type === 'speed') {
-                document.getElementById('speed-value').textContent = parseFloat(value).toFixed(1);
-            } else if (type === 'volume') {
-                document.getElementById('volume-value').textContent = value + '%';
+        // ===== FUNÇÕES DO JOGO =====
+        function startGame() {
+            document.getElementById('menu-overlay').style.display = 'none';
+            gameActive = true;
+            gamePaused = false;
+            canvas.requestPointerLock();
+        }
+
+        function openConfig() {
+            document.getElementById('config-panel').style.display = 'block';
+        }
+
+        function closeConfig() {
+            document.getElementById('config-panel').style.display = 'none';
+        }
+
+        function applyConfig() {
+            config.sens = parseFloat(document.getElementById('sens').value);
+            config.crosshairColor = document.getElementById('crosshair-color').value;
+            config.playerSkin = document.getElementById('player-skin').value;
+            config.weaponSkin = document.getElementById('weapon-skin').value;
+            
+            // Atualizar cores da mira
+            document.querySelector('.crosshair-line.vertical').style.background = '#ff44ff';
+            document.querySelector('.crosshair-line.horizontal').style.background = config.crosshairColor;
+            document.querySelector('.crosshair-dot').style.background = config.crosshairColor;
+            
+            drawWeapon();
+            closeConfig();
+        }
+
+        // Pointer Lock
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === canvas) {
+                document.addEventListener('mousemove', updateCamera);
+            } else {
+                document.removeEventListener('mousemove', updateCamera);
             }
-        }
+        });
 
-        function updateCheckboxDisplay(type) {
-            // Apenas para manter consistência
+        function updateCamera(e) {
+            if (!gameActive || gamePaused) return;
+            const movementX = e.movementX || 0;
+            player.angle += movementX * config.sens * 0.0015;
         }
-
-        function updateSelectDisplay(type, value) {
-            // Apenas para manter consistência
-        }
-
-        // Mostrar notificação de salvamento
-        function showSaveNotification() {
-            const notification = document.getElementById('save-notification');
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 2000);
-        }
-
-        // Salvar configurações
-        function saveSettings() {
-            // Ler valores dos inputs
-            settings.mouseSensitivity = parseFloat(document.getElementById('mouse-sens').value);
-            settings.playerSpeed = parseFloat(document.getElementById('player-speed').value);
-            settings.invertMouse = document.getElementById('invert-mouse').checked;
-            settings.masterVolume = parseInt(document.getElementById('master-volume').value);
-            settings.sfxEnabled = document.getElementById('sfx-enabled').checked;
-            settings.musicEnabled = document.getElementById('music-enabled').checked;
-            settings.graphicsQuality = document.getElementById('graphics-quality').value;
-            settings.showCrosshair = document.getElementById('show-crosshair').checked;
-            settings.showMinimap = document.getElementById('show-minimap').checked;
-            
-            // Aplicar ao jogador
-            player.speed = settings.playerSpeed;
-            
-            // Atualizar elementos visuais
-            document.getElementById('crosshair').style.display = settings.showCrosshair ? 'block' : 'none';
-            document.getElementById('minimap').style.display = settings.showMinimap ? 'block' : 'none';
-            
-            // Salvar no localStorage
-            saveSettingsToStorage();
-            
-            // Mostrar notificação
-            showSaveNotification();
-            
-            // Sair do menu
-            togglePause();
-        }
-
-        // Carregar configurações
-        function loadSettings() {
-            settings = loadSettingsFromStorage();
-            
-            // Atualizar inputs
-            document.getElementById('mouse-sens').value = settings.mouseSensitivity;
-            document.getElementById('player-speed').value = settings.playerSpeed;
-            document.getElementById('invert-mouse').checked = settings.invertMouse;
-            document.getElementById('master-volume').value = settings.masterVolume;
-            document.getElementById('sfx-enabled').checked = settings.sfxEnabled;
-            document.getElementById('music-enabled').checked = settings.musicEnabled;
-            document.getElementById('graphics-quality').value = settings.graphicsQuality;
-            document.getElementById('show-crosshair').checked = settings.showCrosshair;
-            document.getElementById('show-minimap').checked = settings.showMinimap;
-            
-            // Atualizar displays
-            document.getElementById('sens-value').textContent = settings.mouseSensitivity.toFixed(1);
-            document.getElementById('speed-value').textContent = settings.playerSpeed.toFixed(1);
-            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
-            
-            showSaveNotification();
-        }
-
-        // Resetar para configurações padrão
-        function resetToDefaults() {
-            settings = { ...DEFAULT_SETTINGS };
-            
-            // Atualizar inputs
-            document.getElementById('mouse-sens').value = settings.mouseSensitivity;
-            document.getElementById('player-speed').value = settings.playerSpeed;
-            document.getElementById('invert-mouse').checked = settings.invertMouse;
-            document.getElementById('master-volume').value = settings.masterVolume;
-            document.getElementById('sfx-enabled').checked = settings.sfxEnabled;
-            document.getElementById('music-enabled').checked = settings.musicEnabled;
-            document.getElementById('graphics-quality').value = settings.graphicsQuality;
-            document.getElementById('show-crosshair').checked = settings.showCrosshair;
-            document.getElementById('show-minimap').checked = settings.showMinimap;
-            
-            // Atualizar displays
-            document.getElementById('sens-value').textContent = settings.mouseSensitivity.toFixed(1);
-            document.getElementById('speed-value').textContent = settings.playerSpeed.toFixed(1);
-            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
-            
-            showSaveNotification();
-        }
-
-        // Atualizar configurações no menu
-        function updateSettingsDisplay() {
-            document.getElementById('sens-value').textContent = settings.mouseSensitivity.toFixed(1);
-            document.getElementById('speed-value').textContent = settings.playerSpeed.toFixed(1);
-            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
-            
-            document.getElementById('mouse-sens').value = settings.mouseSensitivity;
-            document.getElementById('player-speed').value = settings.playerSpeed;
-            document.getElementById('invert-mouse').checked = settings.invertMouse;
-            document.getElementById('master-volume').value = settings.masterVolume;
-            document.getElementById('sfx-enabled').checked = settings.sfxEnabled;
-            document.getElementById('music-enabled').checked = settings.musicEnabled;
-            document.getElementById('graphics-quality').value = settings.graphicsQuality;
-            document.getElementById('show-crosshair').checked = settings.showCrosshair;
-            document.getElementById('show-minimap').checked = settings.showMinimap;
-        }
-
-        // ========== CONTROLES DO JOGO ==========
 
         // Controles
-        const keys = {};
-
-        // Event listeners
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             keys[key] = true;
             
-            // Tecla ESC para pausar
-            if (key === 'escape') {
-                togglePause();
+            if (e.key === '1') player.currentWeapon = 'ak47';
+            if (e.key === '2') player.currentWeapon = 'awp';
+            if (e.key === '3') player.currentWeapon = 'deagle';
+            if (e.key === 'r') reload();
+            if (e.key === 'Escape') {
+                if (document.pointerLockElement === canvas) {
+                    document.exitPointerLock();
+                } else {
+                    document.getElementById('menu-overlay').style.display = 'flex';
+                    gameActive = false;
+                }
             }
         });
-        
+
         document.addEventListener('keyup', (e) => {
             const key = e.key.toLowerCase();
             keys[key] = false;
         });
-        
-        // Controle do mouse com sensibilidade ajustada
-        document.addEventListener('mousemove', (e) => {
-            if (!gameActive || gamePaused) return;
-            
-            if (lastMouseX === 0) {
-                lastMouseX = e.clientX;
-                return;
-            }
-            
-            // Calcular movimento do mouse
-            const deltaX = e.clientX - lastMouseX;
-            lastMouseX = e.clientX;
-            
-            // Aplicar sensibilidade (agora com valores mais baixos e controlados)
-            // Fórmula: sensibilidade / 500 para ter controle fino
-            const sensitivity = settings.mouseSensitivity / 500;
-            let angleChange = deltaX * sensitivity;
-            
-            if (settings.invertMouse) {
-                angleChange = -angleChange;
-            }
-            
-            player.angle += angleChange;
-        });
-
-        // Reset lastMouseX quando o mouse sai da tela
-        document.addEventListener('mouseleave', () => {
-            lastMouseX = 0;
-        });
 
         canvas.addEventListener('click', () => {
-            if (!gamePaused && gameActive) {
+            if (gameActive && !gamePaused && document.pointerLockElement === canvas) {
                 shoot();
             }
         });
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key.toLowerCase() === 'r' && !gamePaused) {
-                reload();
-            }
-        });
-
-        // Função para alternar pausa
-        function togglePause() {
-            gamePaused = !gamePaused;
-            const pauseMenu = document.getElementById('pause-menu');
-            const pauseIndicator = document.getElementById('pause-indicator');
-            
-            if (gamePaused) {
-                pauseMenu.style.display = 'flex';
-                pauseIndicator.style.display = 'block';
-                updateSettingsDisplay();
-            } else {
-                pauseMenu.style.display = 'none';
-                pauseIndicator.style.display = 'none';
-                lastMouseX = 0; // Reset mouse position tracking
-            }
-        }
-
-        // Função de tiro
+        // ===== TIRO COM AIM.CFG =====
         function shoot() {
-            if (!gameActive || gamePaused) return;
-            if (player.ammo <= 0) {
-                showKillMessage("SEM MUNIÇÃO!", "#ff4444");
-                if (settings.sfxEnabled) {
-                    // Simular som de "sem munição"
-                }
+            const now = Date.now();
+            if (now - lastShot < SHOT_COOLDOWN) return;
+            lastShot = now;
+
+            const weapon = player.weapons[player.currentWeapon];
+            if (weapon.ammo <= 0) {
+                showDamage("SEM MUNIÇÃO!", "#ff4444");
                 return;
             }
 
-            player.ammo--;
+            weapon.ammo--;
+            stats.shotsFired++;
             
-            // Animação da arma
-            weaponCanvas.classList.add('shoot');
-            setTimeout(() => weaponCanvas.classList.remove('shoot'), 100);
-            
-            if (settings.sfxEnabled) {
-                // Simular som de tiro
-            }
+            // Animação
+            document.getElementById('weapon').classList.add('shoot');
+            setTimeout(() => document.getElementById('weapon').classList.remove('shoot'), 80);
 
-            // Raycasting para tiro
+            // Raycast
             const rayAngle = player.angle;
-            const rayX = player.x;
-            const rayY = player.y;
-            
-            // Verificar se acertou algum inimigo
-            let hitEnemy = false;
-            let closestEnemy = null;
-            let closestDist = 300;
+            let hitEnemy = null;
+            let hitDist = Infinity;
 
             enemies.forEach(enemy => {
                 if (!enemy.alive) return;
                 
-                const dx = enemy.x - rayX;
-                const dy = enemy.y - rayY;
-                const distance = Math.sqrt(dx*dx + dy*dy);
+                const dx = enemy.x - player.x;
+                const dy = enemy.y - player.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
                 
-                if (distance > closestDist) return;
+                if (dist > 400) return;
                 
                 const angleToEnemy = Math.atan2(dy, dx);
                 let angleDiff = Math.abs(rayAngle - angleToEnemy);
-                
                 if (angleDiff > Math.PI) angleDiff = 2*Math.PI - angleDiff;
                 
-                if (angleDiff < 0.1) {
-                    if (!wallBetween(rayX, rayY, enemy.x, enemy.y)) {
-                        hitEnemy = true;
-                        if (distance < closestDist) {
-                            closestDist = distance;
-                            closestEnemy = enemy;
-                        }
+                if (angleDiff < 0.08 && dist < hitDist) { // Mais preciso
+                    if (!wallBetween(player.x, player.y, enemy.x, enemy.y)) {
+                        hitEnemy = enemy;
+                        hitDist = dist;
                     }
                 }
             });
 
-            if (closestEnemy) {
-                const isHeadshot = Math.random() > 0.5;
-                const damage = isHeadshot ? 100 : 50;
+            if (hitEnemy) {
+                stats.shotsHit++;
                 
-                closestEnemy.health -= damage;
+                let damage = weapon.damage;
+                const isHeadshot = Math.random() > 0.6; // Mais headshots
                 
-                if (closestEnemy.health <= 0) {
-                    closestEnemy.alive = false;
-                    player.score += isHeadshot ? 100 : 50;
-                    showKillMessage(isHeadshot ? "HEADSHOT! +100" : "+50", isHeadshot ? "#ff4444" : "#ffd700");
+                if (isHeadshot) {
+                    damage *= 2.5;
+                    stats.headshots++;
+                }
+                
+                damage *= Math.max(0.6, 1 - hitDist / 600);
+                
+                hitEnemy.health -= damage;
+                
+                // Efeitos
+                document.getElementById('blood-overlay').classList.add('hit');
+                setTimeout(() => document.getElementById('blood-overlay').classList.remove('hit'), 100);
+                
+                showHitmarker();
+                showDamage(`${Math.round(damage)}`, isHeadshot ? '#ff4444' : '#ffff88');
+                
+                if (hitEnemy.health <= 0) {
+                    hitEnemy.alive = false;
                     
-                    if (settings.sfxEnabled) {
-                        // Som de inimigo morto
-                    }
+                    const points = isHeadshot ? 150 : 100;
+                    player.score += points;
+                    player.kills++;
+                    stats.kills++;
                     
-                    const mapX = Math.floor(closestEnemy.x / CELL_SIZE);
-                    const mapY = Math.floor(closestEnemy.y / CELL_SIZE);
+                    addKillFeed('CT', 'TR', player.currentWeapon, isHeadshot);
+                    showDamage(isHeadshot ? "HEADSHOT!" : "+100", isHeadshot ? "#ff4444" : "#ffff88");
+                    
+                    const mapX = Math.floor(hitEnemy.x / CELL_SIZE);
+                    const mapY = Math.floor(hitEnemy.y / CELL_SIZE);
                     if (map[mapY] && map[mapY][mapX] === 2) {
                         map[mapY][mapX] = 0;
                     }
-                } else {
-                    showKillMessage("HIT! " + damage, "#ffff44");
-                    if (settings.sfxEnabled) {
-                        // Som de acerto
-                    }
-                }
-            } else {
-                showKillMessage("ERROU!", "#aaa");
-                if (settings.sfxEnabled) {
-                    // Som de erro
                 }
             }
 
             updateHUD();
+        }
+
+        function showHitmarker() {
+            const marker = document.getElementById('hitmarker');
+            marker.style.opacity = '1';
+            marker.style.fontSize = '32px';
+            setTimeout(() => {
+                marker.style.opacity = '0';
+            }, 150);
+        }
+
+        function showDamage(text, color) {
+            const indicator = document.getElementById('damage-indicator');
+            indicator.textContent = text;
+            indicator.style.color = color;
+            indicator.style.opacity = '1';
+            setTimeout(() => {
+                indicator.style.opacity = '0';
+            }, 300);
+        }
+
+        function addKillFeed(killer, victim, weapon, headshot) {
+            const feed = document.getElementById('kill-feed');
+            const item = document.createElement('div');
+            item.className = 'kill-feed-item';
+            
+            let weaponName = weapon === 'ak47' ? 'AK47' : weapon === 'awp' ? 'AWP' : 'DEAGLE';
+            item.innerHTML = `${killer} [${weaponName}] ${victim} ${headshot ? '💀' : ''}`;
+            feed.appendChild(item);
+            
+            setTimeout(() => item.remove(), 4000);
+        }
+
+        function reload() {
+            const weapon = player.weapons[player.currentWeapon];
+            if (weapon.reserve > 0 && weapon.ammo < weapon.maxAmmo) {
+                const needed = weapon.maxAmmo - weapon.ammo;
+                const reloadAmount = Math.min(needed, weapon.reserve);
+                weapon.ammo += reloadAmount;
+                weapon.reserve -= reloadAmount;
+                
+                document.getElementById('weapon').classList.add('reload');
+                setTimeout(() => document.getElementById('weapon').classList.remove('reload'), 600);
+                showDamage("RELOAD", "#88ff88");
+                updateHUD();
+            }
         }
 
         function wallBetween(x1, y1, x2, y2) {
@@ -944,59 +886,34 @@
                 const t = i / steps;
                 const checkX = x1 + (x2 - x1) * t;
                 const checkY = y1 + (y2 - y1) * t;
-                
                 const mapX = Math.floor(checkX / CELL_SIZE);
                 const mapY = Math.floor(checkY / CELL_SIZE);
-                
-                if (map[mapY] && map[mapY][mapX] === 1) {
-                    return true;
-                }
+                if (map[mapY] && map[mapY][mapX] === 1) return true;
             }
             return false;
-        }
-
-        function reload() {
-            if (!gameActive || gamePaused) return;
-            if (player.reserveAmmo > 0) {
-                const needed = player.maxAmmo - player.ammo;
-                const reloadAmount = Math.min(needed, player.reserveAmmo);
-                player.ammo += reloadAmount;
-                player.reserveAmmo -= reloadAmount;
-                
-                weaponCanvas.classList.add('reload');
-                setTimeout(() => weaponCanvas.classList.remove('reload'), 500);
-                
-                if (settings.sfxEnabled) {
-                    // Som de recarga
-                }
-                
-                showKillMessage("RECARREGANDO...", "#44ff44");
-                updateHUD();
-            }
         }
 
         function movePlayer() {
             if (!gameActive || gamePaused) return;
             
-            const moveSpeed = player.speed;
             let newX = player.x;
             let newY = player.y;
             
             if (keys['w']) {
-                newX += Math.cos(player.angle) * moveSpeed;
-                newY += Math.sin(player.angle) * moveSpeed;
+                newX += Math.cos(player.angle) * player.speed;
+                newY += Math.sin(player.angle) * player.speed;
             }
             if (keys['s']) {
-                newX -= Math.cos(player.angle) * moveSpeed;
-                newY -= Math.sin(player.angle) * moveSpeed;
+                newX -= Math.cos(player.angle) * player.speed;
+                newY -= Math.sin(player.angle) * player.speed;
             }
             if (keys['a']) {
-                newX += Math.cos(player.angle - Math.PI/2) * moveSpeed;
-                newY += Math.sin(player.angle - Math.PI/2) * moveSpeed;
+                newX += Math.cos(player.angle - Math.PI/2) * player.speed;
+                newY += Math.sin(player.angle - Math.PI/2) * player.speed;
             }
             if (keys['d']) {
-                newX += Math.cos(player.angle + Math.PI/2) * moveSpeed;
-                newY += Math.sin(player.angle + Math.PI/2) * moveSpeed;
+                newX += Math.cos(player.angle + Math.PI/2) * player.speed;
+                newY += Math.sin(player.angle + Math.PI/2) * player.speed;
             }
             
             const mapX = Math.floor(newX / CELL_SIZE);
@@ -1006,65 +923,46 @@
                 player.x = newX;
                 player.y = newY;
             }
-            
-            player.x = Math.max(CELL_SIZE/2, Math.min(CELL_SIZE * MAP_SIZE - CELL_SIZE/2, player.x));
-            player.y = Math.max(CELL_SIZE/2, Math.min(CELL_SIZE * MAP_SIZE - CELL_SIZE/2, player.y));
         }
 
         function render3D() {
-            // Ajustar qualidade gráfica
-            let numRays = WIDTH / 2;
-            if (settings.graphicsQuality === 'low') {
-                numRays = WIDTH / 4;
-            } else if (settings.graphicsQuality === 'high') {
-                numRays = WIDTH;
-            }
-            
-            // Céu e chão
-            ctx.fillStyle = '#111122';
+            // Céu escuro (mod style)
+            ctx.fillStyle = '#0f1217';
             ctx.fillRect(0, 0, WIDTH, HEIGHT/2);
-            ctx.fillStyle = '#332211';
+            ctx.fillStyle = '#1a1f2a';
             ctx.fillRect(0, HEIGHT/2, WIDTH, HEIGHT/2);
             
-            const fov = Math.PI / 3;
-            const pixelSize = Math.floor(WIDTH / numRays);
+            const fov = Math.PI / 2.8; // FOV mais aberto
+            const numRays = 512;
+            const pixelSize = WIDTH / numRays;
             
             for (let i = 0; i < numRays; i++) {
                 const rayAngle = player.angle - fov/2 + (i / numRays) * fov;
                 
                 let distance = 0;
                 let hit = false;
-                let hitType = 0;
-                let rayX = player.x;
-                let rayY = player.y;
+                let hitEnemy = null;
                 
-                const stepSize = 5;
-                
-                while (!hit && distance < 800) {
-                    distance += stepSize;
-                    rayX = player.x + Math.cos(rayAngle) * distance;
-                    rayY = player.y + Math.sin(rayAngle) * distance;
+                while (!hit && distance < 1000) {
+                    distance += 5;
+                    const rayX = player.x + Math.cos(rayAngle) * distance;
+                    const rayY = player.y + Math.sin(rayAngle) * distance;
                     
                     const mapX = Math.floor(rayX / CELL_SIZE);
                     const mapY = Math.floor(rayY / CELL_SIZE);
                     
                     if (mapX < 0 || mapX >= MAP_SIZE || mapY < 0 || mapY >= MAP_SIZE) {
                         hit = true;
-                        hitType = 1;
                     } else if (map[mapY][mapX] === 1) {
                         hit = true;
-                        hitType = 1;
                     } else {
                         for (let e of enemies) {
                             if (!e.alive) continue;
-                            
                             const dx = rayX - e.x;
                             const dy = rayY - e.y;
-                            const enemyDist = Math.sqrt(dx*dx + dy*dy);
-                            
-                            if (enemyDist < 15 && distance > enemyDist - 10 && distance < enemyDist + 10) {
+                            if (Math.sqrt(dx*dx + dy*dy) < 18) {
                                 hit = true;
-                                hitType = 2;
+                                hitEnemy = e;
                                 break;
                             }
                         }
@@ -1076,195 +974,85 @@
                 
                 const x = i * pixelSize;
                 
-                if (hitType === 1) {
-                    const shade = Math.max(50, 255 - Math.min(200, distance / 2));
-                    ctx.fillStyle = `rgb(${shade}, ${shade/2}, ${shade/4})`;
-                    
-                    if (settings.graphicsQuality !== 'low' && i % 4 === 0) {
-                        ctx.fillStyle = `rgb(${shade-20}, ${shade/2-10}, ${shade/4-5})`;
-                    }
-                } else if (hitType === 2) {
-                    const shade = Math.max(100, 255 - Math.min(155, distance / 3));
-                    ctx.fillStyle = `rgb(${shade}, 50, 50)`;
-                } else {
-                    continue;
+                if (hitEnemy) {
+                    // Inimigo com skin
+                    ctx.fillStyle = hitEnemy.skin;
+                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
+                } else if (hit) {
+                    // Parede com textura
+                    const shade = Math.max(40, 255 - Math.min(215, distance / 1.8));
+                    ctx.fillStyle = `rgb(${shade-20}, ${shade/2}, ${shade/4})`;
+                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
                 }
-                
-                ctx.fillRect(
-                    x, 
-                    HEIGHT/2 - wallHeight/2, 
-                    pixelSize, 
-                    wallHeight
-                );
-            }
-            
-            renderSprites();
-        }
-
-        function renderSprites() {
-            enemies.forEach(enemy => {
-                if (!enemy.alive) return;
-                
-                const dx = enemy.x - player.x;
-                const dy = enemy.y - player.y;
-                const distance = Math.sqrt(dx*dx + dy*dy);
-                const angle = Math.atan2(dy, dx);
-                
-                let angleDiff = angle - player.angle;
-                if (angleDiff > Math.PI) angleDiff -= 2*Math.PI;
-                if (angleDiff < -Math.PI) angleDiff += 2*Math.PI;
-                
-                const fov = Math.PI / 3;
-                
-                if (Math.abs(angleDiff) < fov/2) {
-                    const screenX = (angleDiff / (fov/2)) * (WIDTH/2) + WIDTH/2;
-                    const size = Math.min(100, 2000 / Math.max(distance, 1));
-                    
-                    if (!wallBetween(player.x, player.y, enemy.x, enemy.y)) {
-                        if (settings.graphicsQuality === 'low') {
-                            ctx.fillStyle = '#f00';
-                            ctx.fillRect(screenX - size/2, HEIGHT/2 - size, size, size);
-                        } else {
-                            ctx.fillStyle = '#ff4444';
-                            ctx.beginPath();
-                            ctx.arc(screenX, HEIGHT/2 - size/2, size/2, 0, 2*Math.PI);
-                            ctx.fill();
-                            
-                            ctx.fillStyle = '#ffffff';
-                            ctx.beginPath();
-                            ctx.arc(screenX - 5, HEIGHT/2 - size/2 - 5, 3, 0, 2*Math.PI);
-                            ctx.arc(screenX + 5, HEIGHT/2 - size/2 - 5, 3, 0, 2*Math.PI);
-                            ctx.fill();
-                            
-                            ctx.fillStyle = '#000000';
-                            ctx.beginPath();
-                            ctx.arc(screenX - 5, HEIGHT/2 - size/2 - 5, 1, 0, 2*Math.PI);
-                            ctx.arc(screenX + 5, HEIGHT/2 - size/2 - 5, 1, 0, 2*Math.PI);
-                            ctx.fill();
-                        }
-                    }
-                }
-            });
-        }
-
-        function drawWeapon() {
-            weaponCtx.clearRect(0, 0, 300, 200);
-            
-            if (settings.graphicsQuality === 'low') {
-                weaponCtx.fillStyle = '#333';
-                weaponCtx.fillRect(150, 150, 100, 20);
-                weaponCtx.fillRect(200, 130, 30, 30);
-            } else {
-                weaponCtx.fillStyle = '#333';
-                weaponCtx.fillRect(150, 150, 100, 20);
-                weaponCtx.fillRect(230, 140, 30, 40);
-                weaponCtx.fillStyle = '#666';
-                weaponCtx.fillRect(100, 140, 60, 40);
-                weaponCtx.fillStyle = '#222';
-                weaponCtx.fillRect(250, 145, 40, 10);
-                weaponCtx.fillStyle = '#ffd700';
-                weaponCtx.fillRect(200, 130, 5, 5);
             }
         }
 
-        function drawMinimap() {
-            if (!settings.showMinimap) return;
+        function drawRadar() {
+            radarCtx.clearRect(0, 0, 180, 180);
+            radarCtx.fillStyle = '#0f172a';
+            radarCtx.fillRect(0, 0, 180, 180);
             
-            minimapCtx.clearRect(0, 0, 150, 150);
-            
-            const cellSizeMM = 150 / MAP_SIZE;
+            const cellSize = 180 / MAP_SIZE;
             
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     if (map[y][x] === 1) {
-                        minimapCtx.fillStyle = '#5a4e3e';
-                        minimapCtx.fillRect(x * cellSizeMM, y * cellSizeMM, cellSizeMM - 1, cellSizeMM - 1);
-                    } else if (map[y][x] === 2) {
-                        minimapCtx.fillStyle = '#ff4444';
-                        minimapCtx.fillRect(x * cellSizeMM, y * cellSizeMM, cellSizeMM - 1, cellSizeMM - 1);
+                        radarCtx.fillStyle = '#5a4e3e';
+                        radarCtx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
                     }
                 }
             }
             
-            minimapCtx.fillStyle = '#44ff44';
-            const playerX = (player.x / CELL_SIZE) * cellSizeMM;
-            const playerY = (player.y / CELL_SIZE) * cellSizeMM;
-            minimapCtx.beginPath();
-            minimapCtx.arc(playerX, playerY, 3, 0, 2*Math.PI);
-            minimapCtx.fill();
+            enemies.forEach(e => {
+                if (e.alive) {
+                    const dx = e.x - player.x;
+                    const dy = e.y - player.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 500) {
+                        const radarX = 90 + (dx / 500) * 70;
+                        const radarY = 90 + (dy / 500) * 70;
+                        
+                        if (radarX > 0 && radarX < 180 && radarY > 0 && radarY < 180) {
+                            radarCtx.fillStyle = e.skin;
+                            radarCtx.beginPath();
+                            radarCtx.arc(radarX, radarY, 4, 0, 2*Math.PI);
+                            radarCtx.fill();
+                        }
+                    }
+                }
+            });
             
-            minimapCtx.strokeStyle = '#44ff44';
-            minimapCtx.beginPath();
-            minimapCtx.moveTo(playerX, playerY);
-            minimapCtx.lineTo(
-                playerX + Math.cos(player.angle) * 10,
-                playerY + Math.sin(player.angle) * 10
-            );
-            minimapCtx.stroke();
+            radarCtx.fillStyle = '#88ff88';
+            radarCtx.beginPath();
+            radarCtx.arc(90, 90, 5, 0, 2*Math.PI);
+            radarCtx.fill();
+            
+            radarCtx.strokeStyle = '#88ff88';
+            radarCtx.lineWidth = 2;
+            radarCtx.beginPath();
+            radarCtx.moveTo(90, 90);
+            radarCtx.lineTo(90 + Math.cos(player.angle) * 20, 90 + Math.sin(player.angle) * 20);
+            radarCtx.stroke();
         }
 
         function updateHUD() {
-            document.getElementById('health').innerHTML = `❤️ ${player.health}`;
-            document.getElementById('ammo').innerHTML = `🔫 ${player.ammo}/${player.reserveAmmo}`;
+            const weapon = player.weapons[player.currentWeapon];
+            document.getElementById('health').innerHTML = `❤️ ${Math.max(0, Math.round(player.health))}`;
+            document.getElementById('armor').innerHTML = `🛡️ ${player.armor}`;
+            document.getElementById('ammo').innerHTML = `${weapon.ammo}/${weapon.reserve}`;
             document.getElementById('score').innerHTML = `🏆 ${player.score}`;
+            document.getElementById('kills').innerHTML = stats.kills;
+            document.getElementById('headshots').innerHTML = stats.headshots;
+            
+            const accuracy = stats.shotsFired > 0 ? Math.round((stats.shotsHit / stats.shotsFired) * 100) : 0;
+            document.getElementById('accuracy').innerHTML = accuracy;
         }
 
-        function showKillMessage(text, color) {
-            const msg = document.getElementById('kill-message');
-            msg.textContent = text;
-            msg.style.color = color;
-            msg.classList.add('show');
-            setTimeout(() => msg.classList.remove('show'), 800);
-        }
-
-        function restartGame() {
-            player = {
-                x: 300,
-                y: 300,
-                angle: 0,
-                speed: settings.playerSpeed,
-                health: 100,
-                score: 0,
-                ammo: 30,
-                reserveAmmo: 90,
-                maxAmmo: 30
-            };
-            
-            const newMap = [
-                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1],
-                [1,0,2,0,0,0,0,0,0,0,0,0,0,2,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,2,0,0,0,0,2,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,2,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,2,0,0,0,0,2,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1],
-                [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-            ];
-            
-            for (let y = 0; y < MAP_SIZE; y++) {
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    map[y][x] = newMap[y][x];
-                }
-            }
-            
-            loadEnemies();
-            gameActive = true;
-            
-            if (gamePaused) {
-                togglePause();
-            }
-            
-            updateHUD();
-            showKillMessage("NOVA PARTIDA", "#44ff44");
-        }
+        // Game loop
+        let lastTime = performance.now();
+        let frames = 0;
+        let fps = 0;
 
         function gameLoop() {
             if (gameActive && !gamePaused) {
@@ -1273,7 +1061,19 @@
             
             render3D();
             drawWeapon();
-            drawMinimap();
+            drawRadar();
+            updateHUD();
+            
+            // FPS counter
+            frames++;
+            const now = performance.now();
+            const delta = now - lastTime;
+            if (delta >= 1000) {
+                fps = frames;
+                frames = 0;
+                lastTime = now;
+                document.getElementById('fps').innerHTML = fps;
+            }
             
             requestAnimationFrame(gameLoop);
         }
