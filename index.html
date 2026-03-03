@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 MOD - Sprite Edition</title>
+    <title>CS 1.6 MINI - COMPLETO</title>
     <style>
-        /* ... (seus estilos permanecem EXATAMENTE os mesmos) ... */
         * {
             margin: 0;
             padding: 0;
@@ -14,37 +13,36 @@
         }
 
         body {
-            background: #0a0f0f;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial', sans-serif;
             overflow: hidden;
         }
 
         #game-container {
             position: relative;
-            width: 1024px;
-            height: 768px;
-            border: 3px solid #ff4444;
-            border-radius: 0px;
+            width: 900px;
+            height: 600px;
+            border: 3px solid #5a4e3e;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 0 30px #ff444488;
         }
 
+        /* Canvas 3D principal */
         #canvas-3d {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: #1a1e2a;
+            background: #111;
             display: block;
-            image-rendering: crisp-edges;
         }
 
-        /* HUD estilo competitivo */
+        /* HUD sobreposto */
         #hud {
             position: absolute;
             top: 10px;
@@ -52,93 +50,77 @@
             right: 10px;
             display: flex;
             justify-content: space-between;
-            color: #fff;
+            color: #ffd700;
             text-shadow: 2px 2px 0 #000;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
             z-index: 20;
             pointer-events: none;
-            font-family: 'Courier New', monospace;
         }
 
         .hud-item {
-            background: rgba(20, 20, 30, 0.85);
-            padding: 6px 12px;
-            border-left: 3px solid #ff4444;
-            border-right: 1px solid #444;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 4px;
+            border: 1px solid #5a4e3e;
+            backdrop-filter: blur(2px);
         }
 
         #health {
-            color: #ff8888;
+            color: #ff4444;
         }
 
         #armor {
-            color: #88aaff;
+            color: #44aaff;
         }
 
         #ammo {
-            color: #ffff88;
+            color: #ffd700;
         }
 
         #score {
-            color: #88ff88;
+            color: #44ff44;
         }
 
-        #timer {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: #ff4444;
-            padding: 5px 20px;
-            border: 2px solid #ff4444;
-            font-size: 28px;
-            font-weight: bold;
-            z-index: 21;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 3px;
+        #weapon-icon {
+            color: #ffffff;
         }
 
         #kill-feed {
             position: absolute;
-            top: 120px;
-            right: 20px;
+            top: 80px;
+            left: 10px;
             color: #fff;
             font-size: 14px;
+            text-shadow: 1px 1px 0 #000;
             z-index: 21;
-            max-width: 350px;
-            text-align: right;
+            pointer-events: none;
+            max-width: 300px;
         }
 
         .kill-feed-item {
-            background: rgba(30, 30, 40, 0.9);
-            padding: 6px 12px;
-            margin-bottom: 4px;
-            border-right: 4px solid #ff4444;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #000;
-            animation: fadeOut 4s forwards;
-            border-left: 2px solid #444;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 8px;
+            margin-bottom: 2px;
+            border-left: 3px solid #ffd700;
+            animation: fadeOut 3s forwards;
         }
 
         @keyframes fadeOut {
-            0% { opacity: 1; transform: translateX(0); }
-            70% { opacity: 1; transform: translateX(0); }
-            100% { opacity: 0; transform: translateX(20px); }
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         #radar {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            width: 180px;
-            height: 180px;
-            background: rgba(0, 20, 20, 0.9);
-            border: 2px solid #ff4444;
+            bottom: 10px;
+            left: 10px;
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #5a4e3e;
+            border-radius: 50%;
             z-index: 35;
             overflow: hidden;
         }
@@ -146,36 +128,22 @@
         #radar canvas {
             width: 100%;
             height: 100%;
-            filter: contrast(1.2);
         }
 
-        #radar-label {
+        #weapon-display {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: #ff4444;
-            font-size: 10px;
-            z-index: 36;
-            text-shadow: 1px 1px 0 #000;
-            background: rgba(0,0,0,0.5);
-            padding: 2px 5px;
-        }
-
-        #weapon-info {
-            position: absolute;
-            bottom: 20px;
-            left: 220px;
+            bottom: 10px;
+            left: 170px;
             color: #fff;
-            background: rgba(20,20,30,0.9);
-            padding: 8px 15px;
-            border-left: 3px solid #ff4444;
-            font-size: 16px;
+            background: rgba(0,0,0,0.6);
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ffd700;
+            font-size: 14px;
             z-index: 25;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
+        /* Mira central */
         #crosshair {
             position: absolute;
             top: 50%;
@@ -189,8 +157,8 @@
 
         .crosshair-line {
             position: absolute;
-            background: #44ff88;
-            box-shadow: 0 0 5px #00ff00;
+            background: #ffffff;
+            box-shadow: 0 0 5px #ff0000;
         }
 
         .crosshair-line.vertical {
@@ -198,8 +166,6 @@
             height: 20px;
             left: 19px;
             top: 10px;
-            background: #ff44ff;
-            box-shadow: 0 0 8px #ff44ff;
         }
 
         .crosshair-line.horizontal {
@@ -207,381 +173,530 @@
             height: 2px;
             top: 19px;
             left: 10px;
-            background: #44ff88;
-            box-shadow: 0 0 8px #44ff88;
         }
 
         .crosshair-dot {
             position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #ffaa44;
-            border-radius: 0;
-            top: 17px;
-            left: 17px;
-            box-shadow: 0 0 10px #ffaa44;
+            width: 4px;
+            height: 4px;
+            background: #ff0000;
+            border-radius: 50%;
+            top: 18px;
+            left: 18px;
+            box-shadow: 0 0 5px #ff0000;
         }
 
+        /* Arma na mão */
         #weapon {
             position: absolute;
-            bottom: 20px;
-            right: 30px;
-            width: 350px;
-            height: 250px;
+            bottom: 10px;
+            right: 20px;
+            width: 300px;
+            height: 200px;
             z-index: 25;
             pointer-events: none;
-            image-rendering: crisp-edges;
-            filter: drop-shadow(0 0 10px #000);
-        }
-
-        #weapon canvas {
-            width: 100%;
-            height: 100%;
+            image-rendering: pixelated;
+            transform-origin: bottom right;
+            transition: transform 0.05s;
         }
 
         #weapon.shoot {
-            animation: shootAnim 0.08s ease-out;
-        }
-
-        @keyframes shootAnim {
-            0% { transform: scale(1) translateX(0); }
-            30% { transform: scale(0.98) translateX(3px) translateY(3px); }
-            100% { transform: scale(1) translateX(0); }
+            transform: scale(0.95) translateX(5px) translateY(5px);
         }
 
         #weapon.reload {
-            animation: reloadAnim 0.6s ease;
+            animation: weaponReload 0.5s ease;
         }
 
-        @keyframes reloadAnim {
+        @keyframes weaponReload {
             0% { transform: rotate(0deg); }
-            20% { transform: rotate(-8deg) translateX(-10px); }
-            60% { transform: rotate(6deg) translateX(8px); }
+            30% { transform: rotate(-10deg) translateX(-10px); }
+            70% { transform: rotate(5deg) translateX(5px); }
             100% { transform: rotate(0deg); }
         }
 
-        #blood-overlay {
+        /* Efeitos de sangue */
+        .blood-effect {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(180, 0, 0, 0);
+            width: 20px;
+            height: 20px;
+            background: #f00;
+            border-radius: 50%;
             pointer-events: none;
-            z-index: 45;
-            transition: background 0.1s;
+            z-index: 40;
+            animation: bloodFade 0.5s forwards;
         }
 
-        #blood-overlay.hit {
-            background: rgba(180, 0, 0, 0.3);
+        @keyframes bloodFade {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
         }
 
-        #stats {
+        /* Instruções */
+        #instructions {
             position: absolute;
-            top: 120px;
-            left: 20px;
-            color: #88ff88;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-left: 3px solid #88ff88;
-            font-size: 14px;
-            z-index: 21;
-            line-height: 1.8;
-        }
-
-        #damage-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ff8888;
-            font-size: 32px;
-            font-weight: bold;
-            opacity: 0;
-            z-index: 46;
-            pointer-events: none;
-            text-shadow: 2px 2px 0 #000;
-            transition: opacity 0.1s;
-        }
-
-        #fps-counter {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: #88ff88;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 8px;
+            bottom: 50px;
+            left: 170px;
+            color: #aaa;
             font-size: 12px;
-            z-index: 50;
-            font-family: monospace;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            z-index: 20;
         }
 
-        #menu-overlay {
+        #restart-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: #5a4e3e;
+            color: #ffd700;
+            border: 1px solid #ffd700;
+            padding: 5px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 40;
+        }
+
+        #restart-btn:hover {
+            background: #6b5e4e;
+        }
+
+        #kill-message {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ffd700;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000, 0 0 10px #ff0000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 50;
+            pointer-events: none;
+        }
+
+        #kill-message.show {
+            opacity: 1;
+            animation: killFlash 0.5s ease;
+        }
+
+        @keyframes killFlash {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.2); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
+        #money {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #44ff44;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 1px solid #ffd700;
+            font-weight: bold;
+            z-index: 20;
+        }
+
+        /* Botão de pausa */
+        #pause-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #ffd700;
+            border: 1px solid #ffd700;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 45;
+            font-size: 14px;
+        }
+
+        #pause-btn:hover {
+            background: #5a4e3e;
+        }
+
+        /* Menu de pausa */
+        #pause-menu {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 20, 0.95);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 100;
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(5px);
         }
 
-        .menu-box {
-            background: #1a1e2a;
-            border: 3px solid #ff4444;
-            padding: 40px;
-            width: 500px;
-            text-align: center;
-        }
-
-        .menu-box h1 {
-            color: #ff4444;
-            font-size: 48px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 0 0 10px #ff4444;
-        }
-
-        .menu-box h2 {
-            color: #88ff88;
-            font-size: 24px;
-            margin-bottom: 40px;
-            text-transform: uppercase;
-        }
-
-        .menu-btn {
-            background: transparent;
-            color: #fff;
-            border: 2px solid #ff4444;
-            padding: 15px 30px;
-            font-size: 20px;
-            margin: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.2s;
-            width: 250px;
-        }
-
-        .menu-btn:hover {
-            background: #ff4444;
-            color: #000;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #ff4444;
-        }
-
-        .config-panel {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1e2a;
-            border: 3px solid #88ff88;
+        .menu-content {
+            background: #1a1f2a;
+            border: 3px solid #5a4e3e;
+            border-radius: 8px;
             padding: 30px;
             width: 400px;
-            display: none;
-            z-index: 200;
+            color: #ffd700;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
-        .config-panel h3 {
-            color: #88ff88;
-            margin-bottom: 20px;
-            font-size: 24px;
+        .menu-content h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #5a4e3e;
+            padding-bottom: 10px;
         }
 
-        .config-item {
+        .menu-section {
+            margin-bottom: 25px;
+        }
+
+        .menu-section h3 {
+            color: #fff;
             margin-bottom: 15px;
-            text-align: left;
+            font-size: 18px;
         }
 
-        .config-item label {
-            color: #aaa;
+        .setting-item {
+            margin-bottom: 15px;
+        }
+
+        .setting-item label {
             display: block;
+            color: #aaa;
+            font-size: 14px;
             margin-bottom: 5px;
         }
 
-        .config-item input {
+        .setting-item input[type="range"] {
             width: 100%;
-            padding: 8px;
-            background: #0a0f0f;
-            border: 1px solid #ff4444;
-            color: #fff;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
-        #hitmarker {
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #ffd700;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .setting-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .setting-value {
+            float: right;
+            color: #ffd700;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .menu-btn {
+            flex: 1;
+            background: #5a4e3e;
+            color: #ffd700;
+            border: 1px solid #ffd700;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: #6b5e4e;
+            transform: scale(1.02);
+        }
+
+        .menu-btn.primary {
+            background: #ffd700;
+            color: #1a1f2a;
+        }
+
+        .menu-btn.primary:hover {
+            background: #ffed4a;
+        }
+
+        /* Indicador de pausa */
+        #pause-indicator {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 24px;
-            opacity: 0;
-            z-index: 47;
+            color: #ffd700;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #000;
+            z-index: 90;
+            display: none;
             pointer-events: none;
-            transition: opacity 0.05s;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        #save-notification {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #44ff44;
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: 1px solid #44ff44;
+            font-weight: bold;
+            z-index: 200;
+            display: none;
+            animation: fadeInOut 2s ease;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; bottom: 60px; }
+            20% { opacity: 1; bottom: 80px; }
+            80% { opacity: 1; bottom: 80px; }
+            100% { opacity: 0; bottom: 100px; }
+        }
+
+        /* Aviso de mouse travado */
+        #pointer-lock-info {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: #ffd700;
+            padding: 30px;
+            border-radius: 8px;
+            border: 3px solid #ffd700;
+            font-size: 18px;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
+        }
+
+        #pointer-lock-info p {
+            margin: 10px 0;
+        }
+
+        #pointer-lock-info button {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #pointer-lock-info button:hover {
+            background: #ffed4a;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
     <div id="game-container">
+        <!-- Canvas 3D -->
         <canvas id="canvas-3d"></canvas>
         
-        <div id="blood-overlay"></div>
-        <div id="damage-indicator">+100</div>
-        <div id="hitmarker">✖</div>
-        
+        <!-- HUD -->
         <div id="hud">
             <div class="hud-item" id="health">❤️ 100</div>
             <div class="hud-item" id="armor">🛡️ 100</div>
+            <div class="hud-item" id="weapon-icon">🔫 AK-47</div>
             <div class="hud-item" id="ammo">30/90</div>
             <div class="hud-item" id="score">🏆 0</div>
         </div>
 
-        <div id="timer">01:45</div>
+        <div id="money">💰 $800</div>
+
         <div id="kill-feed"></div>
-        <div id="stats">
-            KILLS: <span id="kills">0</span><br>
-            HEADSHOTS: <span id="headshots">0</span><br>
-            TIROS: <span id="tiros">0</span><br>
-            ACERTOS: <span id="acertos">0</span><br>
-            ACC: <span id="accuracy">0</span>%
-        </div>
 
+        <!-- Radar -->
         <div id="radar">
-            <canvas id="radar-canvas" width="180" height="180"></canvas>
+            <canvas id="radar-canvas" width="150" height="150"></canvas>
         </div>
-        <div id="radar-label">⚡ AIM.CFG EDITION ⚡</div>
 
-        <div id="weapon-info">⚡ AK-47 | CUSTOM SKIN ⚡</div>
+        <div id="weapon-display">AK-47 | 5.56mm</div>
 
+        <!-- Mira -->
         <div id="crosshair">
             <div class="crosshair-line vertical"></div>
             <div class="crosshair-line horizontal"></div>
             <div class="crosshair-dot"></div>
         </div>
 
-        <div id="weapon">
-            <canvas id="weapon-canvas" width="350" height="250"></canvas>
+        <!-- Arma na mão -->
+        <canvas id="weapon" width="300" height="200"></canvas>
+
+        <!-- Instruções -->
+        <div id="instructions">WASD = Mover | Clique no jogo para travar mouse | ESC = Soltar mouse | R = Recarregar | 1-3 = Trocar arma</div>
+
+        <!-- Botão de pausa -->
+        <button id="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
+
+        <!-- Botão reiniciar -->
+        <button id="restart-btn" onclick="restartGame()">NOVA PARTIDA</button>
+
+        <!-- Mensagem de kill -->
+        <div id="kill-message">🔫 HEADSHOT!</div>
+
+        <!-- Indicador de pausa -->
+        <div id="pause-indicator">⏸️ PAUSA</div>
+
+        <!-- Notificação de salvamento -->
+        <div id="save-notification">✅ CONFIGURAÇÕES SALVAS!</div>
+
+        <!-- Aviso de mouse travado -->
+        <div id="pointer-lock-info">
+            <p>🎮 CONTROLE DO MOUSE</p>
+            <p>Clique no botão abaixo para travar o mouse no jogo</p>
+            <p>Pressione ESC a qualquer momento para soltar</p>
+            <button onclick="requestPointerLock()">✅ TRAVAR MOUSE</button>
         </div>
 
-        <div id="fps-counter">FPS: <span id="fps">0</span></div>
+        <!-- Menu de pausa -->
+        <div id="pause-menu">
+            <div class="menu-content">
+                <h2>⚙️ CONFIGURAÇÕES</h2>
+                
+                <div class="menu-section">
+                    <h3>🎮 CONTROLES</h3>
+                    <div class="setting-item">
+                        <label>Sensibilidade <span id="sens-value" class="setting-value">2.0</span></label>
+                        <input type="range" id="mouse-sens" min="0.5" max="5" value="2" step="0.1">
+                    </div>
+                    <div class="setting-item">
+                        <label>Inverter Mouse</label>
+                        <input type="checkbox" id="invert-mouse">
+                    </div>
+                </div>
 
-        <div id="menu-overlay">
-            <div class="menu-box">
-                <h1>CS 1.6 MOD</h1>
-                <h2>AIM.CFG EDITION</h2>
-                <button class="menu-btn" onclick="startGame()">▶ INICIAR JOGO</button>
-                <button class="menu-btn" onclick="openConfig()">⚙ CONFIG</button>
-                <button class="menu-btn" onclick="resetGame()">🔄 REINICIAR</button>
-            </div>
-        </div>
+                <div class="menu-section">
+                    <h3>🔊 ÁUDIO</h3>
+                    <div class="setting-item">
+                        <label>Volume <span id="volume-value" class="setting-value">70%</span></label>
+                        <input type="range" id="master-volume" min="0" max="100" value="70">
+                    </div>
+                </div>
 
-        <div id="config-panel" class="config-panel">
-            <h3>⚙ AIM.CFG SETTINGS</h3>
-            <div class="config-item">
-                <label>SENSIBILIDADE: <span id="sens-value">2.5</span></label>
-                <input type="range" id="sens" min="0.5" max="5" value="2.5" step="0.1" oninput="updateSens(this.value)">
+                <div class="menu-section">
+                    <h3>🎨 VÍDEO</h3>
+                    <div class="setting-item">
+                        <label>Qualidade</label>
+                        <select id="graphics-quality">
+                            <option value="low">Baixa</option>
+                            <option value="medium" selected>Média</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="menu-buttons">
+                    <button class="menu-btn primary" onclick="saveSettings()">SALVAR</button>
+                    <button class="menu-btn" onclick="resetToDefaults()">PADRÃO</button>
+                    <button class="menu-btn" onclick="togglePause()">VOLTAR</button>
+                </div>
             </div>
-            <div class="config-item">
-                <label>COR DA MIRA:</label>
-                <select id="crosshair-color" onchange="updateCrosshairColor(this.value)">
-                    <option value="#44ff88">VERDE</option>
-                    <option value="#ff44ff">ROSA</option>
-                    <option value="#44aaff">AZUL</option>
-                    <option value="#ffaa44">LARANJA</option>
-                </select>
-            </div>
-            <div class="config-item">
-                <label>MODELO DO JOGADOR:</label>
-                <select id="player-skin" onchange="updatePlayerSkin(this.value)">
-                    <option value="default">DEFAULT</option>
-                    <option value="blue">BLUE ESL</option>
-                    <option value="red">RED ESL</option>
-                    <option value="pink">HELLO KITTY</option>
-                </select>
-            </div>
-            <div class="config-item">
-                <label>SKIN DA ARMA:</label>
-                <select id="weapon-skin" onchange="updateWeaponSkin(this.value)">
-                    <option value="default">DEFAULT</option>
-                    <option value="blue">BLUE METAL</option>
-                    <option value="gold">GOLD</option>
-                    <option value="camo">CAMO</option>
-                </select>
-            </div>
-            <button class="menu-btn" onclick="closeConfig()" style="width:100%;">VOLTAR</button>
         </div>
     </div>
 
     <script>
-        // ========== CONFIGURAÇÃO INICIAL ==========
+        // ========== CONFIGURAÇÕES ==========
         const canvas = document.getElementById('canvas-3d');
         const ctx = canvas.getContext('2d');
-        const weaponCanvas = document.getElementById('weapon-canvas');
+        const weaponCanvas = document.getElementById('weapon');
         const weaponCtx = weaponCanvas.getContext('2d');
         const radarCanvas = document.getElementById('radar-canvas');
         const radarCtx = radarCanvas.getContext('2d');
 
-        const WIDTH = 1024;
-        const HEIGHT = 768;
+        const WIDTH = 900;
+        const HEIGHT = 600;
         canvas.width = WIDTH;
         canvas.height = HEIGHT;
 
-        // Estatísticas
-        let stats = {
-            kills: 0,
-            headshots: 0,
-            shotsFired: 0,
-            shotsHit: 0
+        // Configurações padrão
+        let settings = {
+            mouseSensitivity: 2.0,
+            invertMouse: false,
+            masterVolume: 70,
+            graphicsQuality: 'medium'
         };
-
-        // Configurações
-        let config = {
-            sens: 2.5,
-            crosshairColor: '#44ff88',
-            playerSkin: 'default',
-            weaponSkin: 'default'
-        };
-
-        // Timer
-        let roundTime = 105;
-        let timerInterval = null;
 
         // Jogador
         let player = {
-            x: 400,
-            y: 400,
+            x: 300,
+            y: 300,
             angle: 0,
-            speed: 4,
+            speed: 3,
             health: 100,
             armor: 100,
             score: 0,
-            kills: 0,
+            money: 800,
             currentWeapon: 'ak47',
             weapons: {
-                ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 38, name: 'AK-47' },
-                awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 115, name: 'AWP' },
-                deagle: { ammo: 7, reserve: 35, maxAmmo: 7, damage: 65, name: 'DEAGLE' }
+                ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35, name: 'AK-47' },
+                awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100, name: 'AWP' },
+                pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25, name: 'Glock' }
             }
         };
 
-        // Inimigos (agora com sprites de bonecos)
+        // Times
+        const teams = ['CT', 'TR'];
+        let playerTeam = 'CT';
+
+        // Inimigos
         let enemies = [];
         let lastShot = 0;
-        const SHOT_COOLDOWN = 120;
-        let gameActive = false;
-        let gamePaused = true;
-        const keys = {};
+        const SHOT_COOLDOWN = 200; // ms
+
+        // Kill feed
+        let killFeed = [];
 
         // Mapa
         const MAP_SIZE = 16;
-        const CELL_SIZE = 48;
+        const CELL_SIZE = 40;
         const map = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -590,7 +705,7 @@
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,2,0,0,0,0,2,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,2,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -601,73 +716,12 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
+        // Template do mapa para reiniciar
         const mapTemplate = JSON.parse(JSON.stringify(map));
 
-        // ===== FUNÇÃO DO SPRITE DETALHADO (INIMIGO 2D) =====
-        function drawEnemySprite(ctx, x, y, size, color, isHit) {
-            // Ajusta a cor se foi atingido
-            const drawColor = isHit ? '#ffffff' : color;
-            
-            // Cabeça (formato de capacete)
-            ctx.fillStyle = drawColor;
-            ctx.beginPath();
-            ctx.ellipse(x, y - size*0.4, size*0.2, size*0.25, 0, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Capacete (detalhe)
-            ctx.fillStyle = '#555';
-            ctx.beginPath();
-            ctx.ellipse(x, y - size*0.5, size*0.18, size*0.12, 0, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Olhos (se for headshot ou apenas para detalhe)
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(x - 3, y - size*0.45, 1, 0, 2*Math.PI);
-            ctx.arc(x + 3, y - size*0.45, 1, 0, 2*Math.PI);
-            ctx.fill();
-            
-            // Corpo (colete)
-            ctx.fillStyle = drawColor;
-            ctx.fillRect(x - size*0.2, y - size*0.15, size*0.4, size*0.3);
-            
-            // Detalhe do colete
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(x - size*0.18, y - size*0.13, size*0.36, size*0.26);
-            
-            // Braço esquerdo
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(x - size*0.3, y - size*0.1, size*0.1, size*0.2);
-            
-            // Braço direito (segurando arma)
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(x + size*0.2, y - size*0.1, size*0.1, size*0.2);
-            
-            // Arma (AK-47 estilizada)
-            ctx.fillStyle = '#222';
-            ctx.fillRect(x + size*0.2, y - size*0.05, size*0.25, size*0.04);
-            ctx.fillRect(x + size*0.4, y - size*0.07, size*0.1, size*0.08);
-            
-            // Perna esquerda
-            ctx.fillStyle = '#222';
-            ctx.fillRect(x - size*0.15, y + size*0.15, size*0.1, size*0.2);
-            
-            // Perna direita
-            ctx.fillStyle = '#222';
-            ctx.fillRect(x + size*0.05, y + size*0.15, size*0.1, size*0.2);
-        }
+        // ========== FUNÇÕES PRINCIPAIS ==========
 
-        // ===== FUNÇÕES DE SKINS =====
-        function getEnemyColor(team) {
-            switch(config.playerSkin) {
-                case 'blue': return '#44aaff';
-                case 'red': return '#ff4444';
-                case 'pink': return '#ff88cc';
-                default: return team === 'TR' ? '#ff5555' : '#44aaff';
-            }
-        }
-
+        // Carregar inimigos
         function loadEnemies() {
             enemies = [];
             for (let y = 0; y < MAP_SIZE; y++) {
@@ -677,10 +731,11 @@
                             x: x * CELL_SIZE + CELL_SIZE/2,
                             y: y * CELL_SIZE + CELL_SIZE/2,
                             health: 100,
+                            armor: 0,
                             alive: true,
                             team: 'TR',
-                            skin: getEnemyColor('TR'),
-                            lastHit: 0
+                            type: 'terrorist',
+                            lastShot: 0
                         });
                     }
                 }
@@ -688,186 +743,78 @@
         }
         loadEnemies();
 
-        // ===== ARMA =====
-        function drawWeapon() {
-            weaponCtx.clearRect(0, 0, 350, 250);
-            
-            const skin = config.weaponSkin;
-            
-            if (skin === 'blue') {
-                weaponCtx.fillStyle = '#2a6f9c';
-                weaponCtx.fillRect(150, 150, 120, 20);
-                weaponCtx.fillStyle = '#1a4f7c';
-                weaponCtx.fillRect(230, 140, 30, 40);
-                weaponCtx.fillStyle = '#3a8fbc';
-                weaponCtx.fillRect(100, 140, 60, 40);
-            } else if (skin === 'gold') {
-                weaponCtx.fillStyle = '#d4a017';
-                weaponCtx.fillRect(150, 150, 120, 20);
-                weaponCtx.fillStyle = '#b4840f';
-                weaponCtx.fillRect(230, 140, 30, 40);
-                weaponCtx.fillStyle = '#f4c430';
-                weaponCtx.fillRect(100, 140, 60, 40);
-            } else if (skin === 'camo') {
-                weaponCtx.fillStyle = '#5f7345';
-                weaponCtx.fillRect(150, 150, 120, 20);
-                weaponCtx.fillStyle = '#4a5a37';
-                weaponCtx.fillRect(230, 140, 30, 40);
-                weaponCtx.fillStyle = '#7a9453';
-                weaponCtx.fillRect(100, 140, 60, 40);
-            } else {
-                weaponCtx.fillStyle = '#333';
-                weaponCtx.fillRect(150, 150, 120, 20);
-                weaponCtx.fillStyle = '#555';
-                weaponCtx.fillRect(230, 140, 30, 40);
-                weaponCtx.fillStyle = '#666';
-                weaponCtx.fillRect(100, 140, 60, 40);
-            }
-            
-            weaponCtx.fillStyle = '#ffd700';
-            weaponCtx.fillRect(200, 130, 8, 8);
-            weaponCtx.fillStyle = '#222';
-            weaponCtx.fillRect(260, 145, 25, 8);
-        }
-
-        // ===== FUNÇÕES DO TIMER =====
-        function iniciarTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            
-            timerInterval = setInterval(() => {
-                if (gameActive && !gamePaused && roundTime > 0) {
-                    roundTime--;
-                    atualizarTimer();
-                    
-                    if (roundTime === 0) {
-                        document.getElementById('timer').innerHTML = "00:00";
-                        showDamage("FIM DE RODADA!", "#ff4444");
-                    }
-                }
-            }, 1000);
-        }
-
-        function atualizarTimer() {
-            const minutes = Math.floor(roundTime / 60);
-            const seconds = roundTime % 60;
-            document.getElementById('timer').innerHTML = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // ===== FUNÇÕES DE CONFIGURAÇÃO =====
-        function updateSens(value) {
-            config.sens = parseFloat(value);
-            document.getElementById('sens-value').innerHTML = value;
-        }
-
-        function updateCrosshairColor(color) {
-            config.crosshairColor = color;
-            document.querySelector('.crosshair-line.vertical').style.background = '#ff44ff';
-            document.querySelector('.crosshair-line.horizontal').style.background = color;
-            document.querySelector('.crosshair-dot').style.background = color;
-        }
-
-        function updatePlayerSkin(skin) {
-            config.playerSkin = skin;
-            loadEnemies();
-        }
-
-        function updateWeaponSkin(skin) {
-            config.weaponSkin = skin;
-            drawWeapon();
-        }
-
-        // ===== FUNÇÕES DO JOGO =====
-        function startGame() {
-            document.getElementById('menu-overlay').style.display = 'none';
-            gameActive = true;
-            gamePaused = false;
-            roundTime = 105;
-            atualizarTimer();
-            iniciarTimer();
+        // ========== POINTER LOCK (MOUSE TRAVADO) ==========
+        function requestPointerLock() {
             canvas.requestPointerLock();
+            document.getElementById('pointer-lock-info').style.display = 'none';
         }
 
-        function openConfig() {
-            document.getElementById('config-panel').style.display = 'block';
-        }
-
-        function closeConfig() {
-            document.getElementById('config-panel').style.display = 'none';
-        }
-
-        function resetGame() {
-            player = {
-                x: 400,
-                y: 400,
-                angle: 0,
-                speed: 4,
-                health: 100,
-                armor: 100,
-                score: 0,
-                kills: 0,
-                currentWeapon: 'ak47',
-                weapons: {
-                    ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 38, name: 'AK-47' },
-                    awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 115, name: 'AWP' },
-                    deagle: { ammo: 7, reserve: 35, maxAmmo: 7, damage: 65, name: 'DEAGLE' }
-                }
-            };
-            
-            stats = {
-                kills: 0,
-                headshots: 0,
-                shotsFired: 0,
-                shotsHit: 0
-            };
-            
-            roundTime = 105;
-            atualizarTimer();
-            if (timerInterval) clearInterval(timerInterval);
-            
-            for (let y = 0; y < MAP_SIZE; y++) {
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    map[y][x] = mapTemplate[y][x];
-                }
-            }
-            
-            loadEnemies();
-            updateHUD();
-            document.getElementById('menu-overlay').style.display = 'flex';
-        }
-
-        // Pointer Lock
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === canvas) {
-                document.addEventListener('mousemove', updateCamera);
-            } else {
-                document.removeEventListener('mousemove', updateCamera);
+        // Evento de clique no canvas para travar mouse
+        canvas.addEventListener('click', () => {
+            if (!gamePaused && document.pointerLockElement !== canvas) {
+                requestPointerLock();
             }
         });
 
-        function updateCamera(e) {
-            if (!gameActive || gamePaused) return;
-            const movementX = e.movementX || 0;
-            player.angle += movementX * config.sens * 0.0015;
+        // Detectar mudança no pointer lock
+        document.addEventListener('pointerlockchange', lockChange);
+        document.addEventListener('mozpointerlockchange', lockChange);
+        document.addEventListener('webkitpointerlockchange', lockChange);
+
+        function lockChange() {
+            if (document.pointerLockElement === canvas) {
+                console.log('Mouse travado');
+                document.addEventListener('mousemove', updateCamera);
+                document.getElementById('pointer-lock-info').style.display = 'none';
+            } else {
+                console.log('Mouse solto');
+                document.removeEventListener('mousemove', updateCamera);
+                // Só mostrar a mensagem se o jogo não estiver pausado
+                if (!gamePaused && gameActive) {
+                    document.getElementById('pointer-lock-info').style.display = 'block';
+                }
+            }
         }
 
-        // Controles
+        // Atualizar câmera com movimento do mouse
+        function updateCamera(e) {
+            if (gamePaused || !gameActive) return;
+            
+            const movementX = e.movementX || 0;
+            let angleChange = movementX * settings.mouseSensitivity * 0.002;
+            
+            if (settings.invertMouse) {
+                angleChange = -angleChange;
+            }
+            
+            player.angle += angleChange;
+        }
+
+        // ========== SISTEMA DE ARMAS ==========
+        function switchWeapon(weapon) {
+            if (player.weapons[weapon]) {
+                player.currentWeapon = weapon;
+                document.getElementById('weapon-icon').innerHTML = `🔫 ${player.weapons[weapon].name}`;
+                document.getElementById('weapon-display').innerHTML = `${player.weapons[weapon].name} | 5.56mm`;
+                updateHUD();
+            }
+        }
+
+        // Eventos de teclado
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             keys[key] = true;
             
-            if (e.key === '1') player.currentWeapon = 'ak47';
-            if (e.key === '2') player.currentWeapon = 'awp';
-            if (e.key === '3') player.currentWeapon = 'deagle';
+            if (e.key === '1') switchWeapon('ak47');
+            if (e.key === '2') switchWeapon('awp');
+            if (e.key === '3') switchWeapon('pistol');
             if (e.key === 'r') reload();
             if (e.key === 'Escape') {
+                // Se o mouse estiver travado, soltar
                 if (document.pointerLockElement === canvas) {
                     document.exitPointerLock();
-                    gamePaused = true;
                 } else {
-                    document.getElementById('menu-overlay').style.display = 'flex';
-                    gameActive = false;
-                    if (timerInterval) clearInterval(timerInterval);
+                    togglePause();
                 }
             }
         });
@@ -877,32 +824,28 @@
             keys[key] = false;
         });
 
-        canvas.addEventListener('click', () => {
-            if (gameActive && !gamePaused && document.pointerLockElement === canvas) {
-                shoot();
-            }
-        });
-
-        // ===== TIRO =====
+        // ========== TIRO ==========
         function shoot() {
             const now = Date.now();
             if (now - lastShot < SHOT_COOLDOWN) return;
             lastShot = now;
 
             const weapon = player.weapons[player.currentWeapon];
-            if (weapon.ammo <= 0) {
-                showDamage("SEM MUNIÇÃO!", "#ff4444");
+            if (!weapon || weapon.ammo <= 0) {
+                showKillMessage("SEM MUNIÇÃO!", "#ff4444");
                 return;
             }
 
             weapon.ammo--;
-            stats.shotsFired++;
             
-            document.getElementById('tiros').innerHTML = stats.shotsFired;
+            // Animação e recoil
+            weaponCanvas.classList.add('shoot');
+            setTimeout(() => weaponCanvas.classList.remove('shoot'), 50);
             
-            document.getElementById('weapon').classList.add('shoot');
-            setTimeout(() => document.getElementById('weapon').classList.remove('shoot'), 80);
+            // Recoil (arma sobe)
+            player.angle -= 0.02;
 
+            // Raycast do tiro
             const rayAngle = player.angle;
             let hitEnemy = null;
             let hitDist = Infinity;
@@ -914,13 +857,13 @@
                 const dy = enemy.y - player.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 
-                if (dist > 400) return;
+                if (dist > 300) return;
                 
                 const angleToEnemy = Math.atan2(dy, dx);
                 let angleDiff = Math.abs(rayAngle - angleToEnemy);
                 if (angleDiff > Math.PI) angleDiff = 2*Math.PI - angleDiff;
                 
-                if (angleDiff < 0.08 && dist < hitDist) {
+                if (angleDiff < 0.1 && dist < hitDist) {
                     if (!wallBetween(player.x, player.y, enemy.x, enemy.y)) {
                         hitEnemy = enemy;
                         hitDist = dist;
@@ -929,70 +872,62 @@
             });
 
             if (hitEnemy) {
-                stats.shotsHit++;
-                document.getElementById('acertos').innerHTML = stats.shotsHit;
-                
+                // Dano por região
+                const weapon = player.weapons[player.currentWeapon];
                 let damage = weapon.damage;
-                const isHeadshot = Math.random() > 0.6;
                 
-                if (isHeadshot) {
-                    damage *= 2.5;
-                    stats.headshots++;
-                    document.getElementById('headshots').innerHTML = stats.headshots;
-                }
+                // Headshot baseado na distância/ângulo
+                const isHeadshot = Math.random() > 0.7;
+                if (isHeadshot) damage *= 2;
                 
-                damage *= Math.max(0.6, 1 - hitDist / 600);
+                // Reduzir dano pela distância
+                damage *= Math.max(0.5, 1 - hitDist / 500);
                 
                 hitEnemy.health -= damage;
-                hitEnemy.lastHit = now;
                 
-                document.getElementById('blood-overlay').classList.add('hit');
-                setTimeout(() => document.getElementById('blood-overlay').classList.remove('hit'), 100);
-                
-                showHitmarker();
-                showDamage(`${Math.round(damage)}`, isHeadshot ? '#ff4444' : '#ffff88');
+                // Criar efeito de sangue
+                createBloodEffect(hitEnemy.x, hitEnemy.y);
                 
                 if (hitEnemy.health <= 0) {
                     hitEnemy.alive = false;
                     
-                    const points = isHeadshot ? 150 : 100;
-                    player.score += points;
-                    player.kills++;
-                    stats.kills++;
+                    // Pontuação e dinheiro
+                    const killPoints = isHeadshot ? 150 : 100;
+                    player.score += killPoints;
+                    player.money += 300;
                     
-                    document.getElementById('kills').innerHTML = stats.kills;
+                    // Kill feed
+                    addKillFeed(playerTeam, 'TR', player.currentWeapon, isHeadshot);
                     
-                    addKillFeed('CT', 'TR', player.currentWeapon, isHeadshot);
-                    showDamage(isHeadshot ? "HEADSHOT!" : "+100", isHeadshot ? "#ff4444" : "#ffff88");
+                    showKillMessage(isHeadshot ? "HEADSHOT! +150" : "+100", isHeadshot ? "#ff4444" : "#ffd700");
                     
+                    // Remover do mapa
                     const mapX = Math.floor(hitEnemy.x / CELL_SIZE);
                     const mapY = Math.floor(hitEnemy.y / CELL_SIZE);
                     if (map[mapY] && map[mapY][mapX] === 2) {
                         map[mapY][mapX] = 0;
                     }
+                } else {
+                    showKillMessage(`HIT! ${Math.round(damage)}`, "#ffff44");
                 }
             }
 
             updateHUD();
         }
 
-        function showHitmarker() {
-            const marker = document.getElementById('hitmarker');
-            marker.style.opacity = '1';
-            marker.style.fontSize = '32px';
-            setTimeout(() => {
-                marker.style.opacity = '0';
-            }, 100);
-        }
-
-        function showDamage(text, color) {
-            const indicator = document.getElementById('damage-indicator');
-            indicator.textContent = text;
-            indicator.style.color = color;
-            indicator.style.opacity = '1';
-            setTimeout(() => {
-                indicator.style.opacity = '0';
-            }, 200);
+        // ========== EFEITOS ==========
+        function createBloodEffect(x, y) {
+            const blood = document.createElement('div');
+            blood.className = 'blood-effect';
+            
+            // Converter coordenadas do mundo para tela (aproximado)
+            const screenX = (x / (CELL_SIZE * MAP_SIZE)) * WIDTH;
+            const screenY = (y / (CELL_SIZE * MAP_SIZE)) * HEIGHT;
+            
+            blood.style.left = screenX + 'px';
+            blood.style.top = screenY + 'px';
+            document.getElementById('game-container').appendChild(blood);
+            setTimeout(() => blood.remove(), 500);
         }
 
         function addKillFeed(killer, victim, weapon, headshot) {
@@ -1000,13 +935,20 @@
             const item = document.createElement('div');
             item.className = 'kill-feed-item';
             
-            let weaponName = weapon === 'ak47' ? 'AK47' : weapon === 'awp' ? 'AWP' : 'DEAGLE';
-            item.innerHTML = `${killer} [${weaponName}] ${victim} ${headshot ? '💀' : ''}`;
+            let weaponName = '';
+            if (weapon === 'ak47') weaponName = 'AK-47';
+            else if (weapon === 'awp') weaponName = 'AWP';
+            else weaponName = 'Glock';
+            
+            item.innerHTML = `${killer} 🔫 ${weaponName} ${headshot ? '💀' : ''} ${victim}`;
             feed.appendChild(item);
             
-            setTimeout(() => item.remove(), 4000);
+            setTimeout(() => {
+                if (item.parentNode) item.remove();
+            }, 3000);
         }
 
+        // ========== RECARREGAR ==========
         function reload() {
             const weapon = player.weapons[player.currentWeapon];
             if (weapon.reserve > 0 && weapon.ammo < weapon.maxAmmo) {
@@ -1015,83 +957,24 @@
                 weapon.ammo += reloadAmount;
                 weapon.reserve -= reloadAmount;
                 
-                document.getElementById('weapon').classList.add('reload');
-                setTimeout(() => document.getElementById('weapon').classList.remove('reload'), 600);
-                showDamage("RELOAD", "#88ff88");
+                weaponCanvas.classList.add('reload');
+                setTimeout(() => weaponCanvas.classList.remove('reload'), 500);
+                
+                showKillMessage("RECARREGANDO...", "#44ff44");
                 updateHUD();
             }
         }
 
-        function wallBetween(x1, y1, x2, y2) {
-            const steps = 10;
-            for (let i = 1; i <= steps; i++) {
-                const t = i / steps;
-                const checkX = x1 + (x2 - x1) * t;
-                const checkY = y1 + (y2 - y1) * t;
-                const mapX = Math.floor(checkX / CELL_SIZE);
-                const mapY = Math.floor(checkY / CELL_SIZE);
-                if (map[mapY] && map[mapY][mapX] === 1) return true;
-            }
-            return false;
-        }
-
-        function movePlayer() {
-            if (!gameActive || gamePaused) return;
-            
-            let newX = player.x;
-            let newY = player.y;
-            
-            if (keys['w']) {
-                newX += Math.cos(player.angle) * player.speed;
-                newY += Math.sin(player.angle) * player.speed;
-            }
-            if (keys['s']) {
-                newX -= Math.cos(player.angle) * player.speed;
-                newY -= Math.sin(player.angle) * player.speed;
-            }
-            if (keys['a']) {
-                newX += Math.cos(player.angle - Math.PI/2) * player.speed;
-                newY += Math.sin(player.angle - Math.PI/2) * player.speed;
-            }
-            if (keys['d']) {
-                newX += Math.cos(player.angle + Math.PI/2) * player.speed;
-                newY += Math.sin(player.angle + Math.PI/2) * player.speed;
-            }
-            
-            const mapX = Math.floor(newX / CELL_SIZE);
-            const mapY = Math.floor(newY / CELL_SIZE);
-            
-            if (map[mapY] && map[mapY][mapX] !== 1) {
-                player.x = newX;
-                player.y = newY;
-            }
-        }
-
+        // ========== RENDERIZAÇÃO 3D ==========
         function render3D() {
-            // Céu com gradiente
-            const gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT/2);
-            gradient.addColorStop(0, '#0a1a2a');
-            gradient.addColorStop(1, '#1a2a3a');
-            ctx.fillStyle = gradient;
+            // Céu e chão
+            ctx.fillStyle = '#87CEEB';
             ctx.fillRect(0, 0, WIDTH, HEIGHT/2);
-            
-            // Chão
-            ctx.fillStyle = '#2a3a2a';
+            ctx.fillStyle = '#8B4513';
             ctx.fillRect(0, HEIGHT/2, WIDTH, HEIGHT/2);
             
-            // Linhas do chão
-            ctx.strokeStyle = '#3a4a3a';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < WIDTH; i += 50) {
-                ctx.beginPath();
-                ctx.moveTo(i, HEIGHT/2);
-                ctx.lineTo(i + 30, HEIGHT);
-                ctx.strokeStyle = '#3a4a3a';
-                ctx.stroke();
-            }
-            
-            const fov = Math.PI / 2.8;
-            const numRays = 512;
+            const fov = Math.PI / 3;
+            const numRays = settings.graphicsQuality === 'high' ? WIDTH : WIDTH/2;
             const pixelSize = WIDTH / numRays;
             
             for (let i = 0; i < numRays; i++) {
@@ -1099,10 +982,10 @@
                 
                 let distance = 0;
                 let hit = false;
+                let hitType = 0;
                 let hitEnemy = null;
-                let hitSide = '';
                 
-                while (!hit && distance < 1000) {
+                while (!hit && distance < 800) {
                     distance += 5;
                     const rayX = player.x + Math.cos(rayAngle) * distance;
                     const rayY = player.y + Math.sin(rayAngle) * distance;
@@ -1112,24 +995,21 @@
                     
                     if (mapX < 0 || mapX >= MAP_SIZE || mapY < 0 || mapY >= MAP_SIZE) {
                         hit = true;
+                        hitType = 1;
                     } else if (map[mapY][mapX] === 1) {
                         hit = true;
-                        // Determinar qual lado da parede foi atingido
-                        const dx = rayX - (mapX * CELL_SIZE + CELL_SIZE/2);
-                        const dy = rayY - (mapY * CELL_SIZE + CELL_SIZE/2);
-                        if (Math.abs(dx) > Math.abs(dy)) {
-                            hitSide = dx > 0 ? 'right' : 'left';
-                        } else {
-                            hitSide = dy > 0 ? 'bottom' : 'top';
-                        }
+                        hitType = 1;
                     } else {
                         for (let e of enemies) {
                             if (!e.alive) continue;
+                            
                             const dx = rayX - e.x;
                             const dy = rayY - e.y;
                             const enemyDist = Math.sqrt(dx*dx + dy*dy);
-                            if (enemyDist < 18) {
+                            
+                            if (enemyDist < 15) {
                                 hit = true;
+                                hitType = 2;
                                 hitEnemy = e;
                                 break;
                             }
@@ -1142,62 +1022,59 @@
                 
                 const x = i * pixelSize;
                 
-                if (hitEnemy) {
-                    // Desenhar sprite do inimigo
-                    const screenX = x + pixelSize/2;
-                    const screenY = HEIGHT/2;
-                    const size = wallHeight * 1.2;
+                if (hitType === 1) {
+                    // Parede com textura
+                    const shade = Math.max(50, 255 - Math.min(200, distance / 2));
+                    ctx.fillStyle = `rgb(${shade}, ${shade/2}, ${shade/4})`;
+                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
+                } else if (hitType === 2 && hitEnemy) {
+                    // Inimigo
+                    const shade = Math.max(100, 255 - Math.min(155, distance / 3));
                     
-                    drawEnemySprite(
-                        ctx, 
-                        screenX, 
-                        screenY, 
-                        size, 
-                        hitEnemy.skin,
-                        Date.now() - hitEnemy.lastHit < 100
-                    );
-                } else if (hit) {
-                    // Desenhar parede com textura
-                    const shade = Math.max(40, 255 - Math.min(215, distance / 1.8));
-                    let wallColor;
-                    if (hitSide === 'left' || hitSide === 'right') {
-                        wallColor = `rgb(${shade-30}, ${shade/2-10}, ${shade/4-5})`;
+                    // Cor baseada no time
+                    if (hitEnemy.team === 'TR') {
+                        ctx.fillStyle = `rgb(${shade}, 50, 50)`;
                     } else {
-                        wallColor = `rgb(${shade-20}, ${shade/2}, ${shade/4})`;
+                        ctx.fillStyle = `rgb(50, 50, ${shade})`;
                     }
-                    ctx.fillStyle = wallColor;
+                    
                     ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
                     
-                    // Adicionar detalhes de textura
-                    if (i % 4 === 0) {
-                        ctx.fillStyle = `rgba(0,0,0,0.2)`;
-                        ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize/2, wallHeight);
+                    // Detalhes do rosto
+                    if (settings.graphicsQuality !== 'low') {
+                        ctx.fillStyle = '#fff';
+                        ctx.fillRect(x + pixelSize/4, HEIGHT/2 - wallHeight/4, 2, 2);
+                        ctx.fillRect(x + 3*pixelSize/4, HEIGHT/2 - wallHeight/4, 2, 2);
                     }
                 }
             }
         }
 
+        // ========== RADAR ==========
         function drawRadar() {
-            radarCtx.clearRect(0, 0, 180, 180);
-            radarCtx.fillStyle = '#0f172a';
-            radarCtx.fillRect(0, 0, 180, 180);
+            radarCtx.clearRect(0, 0, 150, 150);
             
-            // Grid do radar
+            // Fundo
+            radarCtx.fillStyle = '#0a0f0f';
+            radarCtx.fillRect(0, 0, 150, 150);
+            
+            // Grid
             radarCtx.strokeStyle = '#2a4a4a';
-            radarCtx.lineWidth = 1;
-            for (let i = 0; i <= 180; i += 30) {
+            radarCtx.lineWidth = 0.5;
+            for (let i = 0; i <= 150; i+= 15) {
                 radarCtx.beginPath();
                 radarCtx.moveTo(i, 0);
-                radarCtx.lineTo(i, 180);
+                radarCtx.lineTo(i, 150);
                 radarCtx.stroke();
+                
                 radarCtx.beginPath();
                 radarCtx.moveTo(0, i);
-                radarCtx.lineTo(180, i);
+                radarCtx.lineTo(150, i);
                 radarCtx.stroke();
             }
             
-            const cellSize = 180 / MAP_SIZE;
-            
+            // Paredes
+            const cellSize = 150 / MAP_SIZE;
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     if (map[y][x] === 1) {
@@ -1207,37 +1084,128 @@
                 }
             }
             
+            // Inimigos vivos
             enemies.forEach(e => {
                 if (e.alive) {
                     const dx = e.x - player.x;
                     const dy = e.y - player.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     
-                    if (dist < 500) {
-                        const radarX = 90 + (dx / 500) * 70;
-                        const radarY = 90 + (dy / 500) * 70;
+                    if (dist < 400) { // Mostrar apenas inimigos próximos
+                        const radarX = 75 + (dx / 400) * 60;
+                        const radarY = 75 + (dy / 400) * 60;
                         
-                        if (radarX > 0 && radarX < 180 && radarY > 0 && radarY < 180) {
-                            radarCtx.fillStyle = e.skin;
+                        if (radarX > 0 && radarX < 150 && radarY > 0 && radarY < 150) {
+                            radarCtx.fillStyle = '#ff4444';
                             radarCtx.beginPath();
-                            radarCtx.arc(radarX, radarY, 4, 0, 2*Math.PI);
+                            radarCtx.arc(radarX, radarY, 3, 0, 2*Math.PI);
                             radarCtx.fill();
                         }
                     }
                 }
             });
             
-            radarCtx.fillStyle = '#88ff88';
+            // Jogador
+            radarCtx.fillStyle = '#44ff44';
             radarCtx.beginPath();
-            radarCtx.arc(90, 90, 5, 0, 2*Math.PI);
+            radarCtx.arc(75, 75, 4, 0, 2*Math.PI);
             radarCtx.fill();
             
-            radarCtx.strokeStyle = '#88ff88';
+            // Direção
+            radarCtx.strokeStyle = '#44ff44';
             radarCtx.lineWidth = 2;
             radarCtx.beginPath();
-            radarCtx.moveTo(90, 90);
-            radarCtx.lineTo(90 + Math.cos(player.angle) * 20, 90 + Math.sin(player.angle) * 20);
+            radarCtx.moveTo(75, 75);
+            radarCtx.lineTo(75 + Math.cos(player.angle) * 15, 75 + Math.sin(player.angle) * 15);
             radarCtx.stroke();
+        }
+
+        // ========== ARMA NA MÃO ==========
+        function drawWeapon() {
+            weaponCtx.clearRect(0, 0, 300, 200);
+            
+            const weapon = player.weapons[player.currentWeapon];
+            
+            if (player.currentWeapon === 'ak47') {
+                // AK-47
+                weaponCtx.fillStyle = '#333';
+                weaponCtx.fillRect(150, 150, 100, 20);
+                weaponCtx.fillRect(230, 140, 30, 40);
+                weaponCtx.fillStyle = '#666';
+                weaponCtx.fillRect(100, 140, 60, 40);
+                weaponCtx.fillStyle = '#222';
+                weaponCtx.fillRect(250, 145, 40, 10);
+                weaponCtx.fillStyle = '#ffd700';
+                weaponCtx.fillRect(200, 130, 5, 5);
+            } else if (player.currentWeapon === 'awp') {
+                // AWP
+                weaponCtx.fillStyle = '#2a4a4a';
+                weaponCtx.fillRect(120, 150, 150, 15);
+                weaponCtx.fillRect(250, 140, 30, 35);
+                weaponCtx.fillStyle = '#5a5a5a';
+                weaponCtx.fillRect(100, 140, 40, 40);
+                weaponCtx.fillStyle = '#222';
+                weaponCtx.fillRect(260, 145, 30, 5);
+            } else {
+                // Pistola
+                weaponCtx.fillStyle = '#444';
+                weaponCtx.fillRect(200, 150, 60, 15);
+                weaponCtx.fillRect(180, 140, 30, 25);
+                weaponCtx.fillStyle = '#666';
+                weaponCtx.fillRect(150, 140, 30, 30);
+            }
+        }
+
+        // ========== UTILITÁRIOS ==========
+        function wallBetween(x1, y1, x2, y2) {
+            const steps = 10;
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const checkX = x1 + (x2 - x1) * t;
+                const checkY = y1 + (y2 - y1) * t;
+                
+                const mapX = Math.floor(checkX / CELL_SIZE);
+                const mapY = Math.floor(checkY / CELL_SIZE);
+                
+                if (map[mapY] && map[mapY][mapX] === 1) return true;
+            }
+            return false;
+        }
+
+        function movePlayer() {
+            if (!gameActive || gamePaused) return;
+            
+            const moveSpeed = player.speed;
+            let newX = player.x;
+            let newY = player.y;
+            
+            if (keys['w']) {
+                newX += Math.cos(player.angle) * moveSpeed;
+                newY += Math.sin(player.angle) * moveSpeed;
+            }
+            if (keys['s']) {
+                newX -= Math.cos(player.angle) * moveSpeed;
+                newY -= Math.sin(player.angle) * moveSpeed;
+            }
+            if (keys['a']) {
+                newX += Math.cos(player.angle - Math.PI/2) * moveSpeed;
+                newY += Math.sin(player.angle - Math.PI/2) * moveSpeed;
+            }
+            if (keys['d']) {
+                newX += Math.cos(player.angle + Math.PI/2) * moveSpeed;
+                newY += Math.sin(player.angle + Math.PI/2) * moveSpeed;
+            }
+            
+            const mapX = Math.floor(newX / CELL_SIZE);
+            const mapY = Math.floor(newY / CELL_SIZE);
+            
+            if (map[mapY] && map[mapY][mapX] !== 1) {
+                player.x = newX;
+                player.y = newY;
+            }
+            
+            player.x = Math.max(CELL_SIZE/2, Math.min(CELL_SIZE * MAP_SIZE - CELL_SIZE/2, player.x));
+            player.y = Math.max(CELL_SIZE/2, Math.min(CELL_SIZE * MAP_SIZE - CELL_SIZE/2, player.y));
         }
 
         function updateHUD() {
@@ -1246,21 +1214,110 @@
             document.getElementById('armor').innerHTML = `🛡️ ${player.armor}`;
             document.getElementById('ammo').innerHTML = `${weapon.ammo}/${weapon.reserve}`;
             document.getElementById('score').innerHTML = `🏆 ${player.score}`;
-            
-            document.getElementById('kills').innerHTML = stats.kills;
-            document.getElementById('headshots').innerHTML = stats.headshots;
-            document.getElementById('tiros').innerHTML = stats.shotsFired;
-            document.getElementById('acertos').innerHTML = stats.shotsHit;
-            
-            const accuracy = stats.shotsFired > 0 ? Math.round((stats.shotsHit / stats.shotsFired) * 100) : 0;
-            document.getElementById('accuracy').innerHTML = accuracy;
+            document.getElementById('money').innerHTML = `💰 $${player.money}`;
         }
 
-        // Game loop
-        let lastTime = performance.now();
-        let frames = 0;
-        let fps = 0;
+        function showKillMessage(text, color) {
+            const msg = document.getElementById('kill-message');
+            msg.textContent = text;
+            msg.style.color = color;
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 800);
+        }
 
+        // ========== ESTADO DO JOGO ==========
+        let gamePaused = false;
+        let gameActive = true;
+        const keys = {};
+
+        // Evento de tiro (clique no canvas)
+        canvas.addEventListener('click', () => {
+            if (!gamePaused && gameActive && document.pointerLockElement === canvas) {
+                shoot();
+            }
+        });
+
+        // ========== PAUSA E CONFIGURAÇÕES ==========
+        function togglePause() {
+            gamePaused = !gamePaused;
+            const pauseMenu = document.getElementById('pause-menu');
+            const pauseIndicator = document.getElementById('pause-indicator');
+            
+            if (gamePaused) {
+                pauseMenu.style.display = 'flex';
+                pauseIndicator.style.display = 'block';
+                // Se o mouse estiver travado, soltar ao pausar
+                if (document.pointerLockElement === canvas) {
+                    document.exitPointerLock();
+                }
+            } else {
+                pauseMenu.style.display = 'none';
+                pauseIndicator.style.display = 'none';
+            }
+        }
+
+        function saveSettings() {
+            settings.mouseSensitivity = parseFloat(document.getElementById('mouse-sens').value);
+            settings.invertMouse = document.getElementById('invert-mouse').checked;
+            settings.masterVolume = parseInt(document.getElementById('master-volume').value);
+            settings.graphicsQuality = document.getElementById('graphics-quality').value;
+            
+            document.getElementById('sens-value').textContent = settings.mouseSensitivity.toFixed(1);
+            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
+            
+            showSaveNotification();
+            togglePause();
+        }
+
+        function resetToDefaults() {
+            document.getElementById('mouse-sens').value = 2.0;
+            document.getElementById('invert-mouse').checked = false;
+            document.getElementById('master-volume').value = 70;
+            document.getElementById('graphics-quality').value = 'medium';
+            
+            document.getElementById('sens-value').textContent = '2.0';
+            document.getElementById('volume-value').textContent = '70%';
+        }
+
+        function showSaveNotification() {
+            const notif = document.getElementById('save-notification');
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 2000);
+        }
+
+        function restartGame() {
+            player = {
+                x: 300,
+                y: 300,
+                angle: 0,
+                speed: 3,
+                health: 100,
+                armor: 100,
+                score: 0,
+                money: 800,
+                currentWeapon: 'ak47',
+                weapons: {
+                    ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35, name: 'AK-47' },
+                    awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100, name: 'AWP' },
+                    pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25, name: 'Glock' }
+                }
+            };
+            
+            // Restaurar mapa
+            for (let y = 0; y < MAP_SIZE; y++) {
+                for (let x = 0; x < MAP_SIZE; x++) {
+                    map[y][x] = mapTemplate[y][x];
+                }
+            }
+            
+            loadEnemies();
+            gameActive = true;
+            if (gamePaused) togglePause();
+            updateHUD();
+            showKillMessage("NOVA PARTIDA", "#44ff44");
+        }
+
+        // ========== GAME LOOP ==========
         function gameLoop() {
             if (gameActive && !gamePaused) {
                 movePlayer();
@@ -1269,25 +1326,22 @@
             render3D();
             drawWeapon();
             drawRadar();
-            updateHUD();
-            
-            frames++;
-            const now = performance.now();
-            const delta = now - lastTime;
-            if (delta >= 1000) {
-                fps = frames;
-                frames = 0;
-                lastTime = now;
-                document.getElementById('fps').innerHTML = fps;
-            }
             
             requestAnimationFrame(gameLoop);
         }
 
-        drawWeapon();
+        // Inicialização
         updateHUD();
         gameLoop();
 
+        // Mostrar info de mouse lock após 1 segundo
+        setTimeout(() => {
+            if (document.pointerLockElement !== canvas) {
+                document.getElementById('pointer-lock-info').style.display = 'block';
+            }
+        }, 1000);
+
+        // Prevenir menu de contexto no canvas
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     </script>
 </body>
