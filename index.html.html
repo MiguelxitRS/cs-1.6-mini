@@ -301,6 +301,7 @@
             z-index: 46;
             pointer-events: none;
             text-shadow: 2px 2px 0 #000;
+            transition: opacity 0.1s;
         }
 
         #fps-counter {
@@ -423,6 +424,7 @@
             opacity: 0;
             z-index: 47;
             pointer-events: none;
+            transition: opacity 0.05s;
         }
     </style>
 </head>
@@ -446,6 +448,8 @@
         <div id="stats">
             KILLS: <span id="kills">0</span><br>
             HEADSHOTS: <span id="headshots">0</span><br>
+            TIROS: <span id="tiros">0</span><br>
+            ACERTOS: <span id="acertos">0</span><br>
             ACC: <span id="accuracy">0</span>%
         </div>
 
@@ -474,19 +478,19 @@
                 <h2>AIM.CFG EDITION</h2>
                 <button class="menu-btn" onclick="startGame()">▶ INICIAR JOGO</button>
                 <button class="menu-btn" onclick="openConfig()">⚙ CONFIG</button>
-                <button class="menu-btn" onclick="window.location.reload()">🔄 SKINS</button>
+                <button class="menu-btn" onclick="resetGame()">🔄 REINICIAR</button>
             </div>
         </div>
 
         <div id="config-panel" class="config-panel">
             <h3>⚙ AIM.CFG SETTINGS</h3>
             <div class="config-item">
-                <label>SENSIBILIDADE:</label>
-                <input type="range" id="sens" min="0.5" max="5" value="2.5" step="0.1">
+                <label>SENSIBILIDADE: <span id="sens-value">2.5</span></label>
+                <input type="range" id="sens" min="0.5" max="5" value="2.5" step="0.1" oninput="updateSens(this.value)">
             </div>
             <div class="config-item">
                 <label>COR DA MIRA:</label>
-                <select id="crosshair-color">
+                <select id="crosshair-color" onchange="updateCrosshairColor(this.value)">
                     <option value="#44ff88">VERDE</option>
                     <option value="#ff44ff">ROSA</option>
                     <option value="#44aaff">AZUL</option>
@@ -495,7 +499,7 @@
             </div>
             <div class="config-item">
                 <label>MODELO DO JOGADOR:</label>
-                <select id="player-skin">
+                <select id="player-skin" onchange="updatePlayerSkin(this.value)">
                     <option value="default">DEFAULT</option>
                     <option value="blue">BLUE ESL</option>
                     <option value="red">RED ESL</option>
@@ -504,15 +508,14 @@
             </div>
             <div class="config-item">
                 <label>SKIN DA ARMA:</label>
-                <select id="weapon-skin">
+                <select id="weapon-skin" onchange="updateWeaponSkin(this.value)">
                     <option value="default">DEFAULT</option>
                     <option value="blue">BLUE METAL</option>
                     <option value="gold">GOLD</option>
                     <option value="camo">CAMO</option>
                 </select>
             </div>
-            <button class="menu-btn" onclick="applyConfig()" style="width:100%;">APLICAR</button>
-            <button class="menu-btn" onclick="closeConfig()" style="width:100%;margin-top:10px;">VOLTAR</button>
+            <button class="menu-btn" onclick="closeConfig()" style="width:100%;">VOLTAR</button>
         </div>
     </div>
 
@@ -564,15 +567,15 @@
             }
         };
 
-        // Inimigos (agora com skins coloridas)
+        // Inimigos
         let enemies = [];
         let lastShot = 0;
-        const SHOT_COOLDOWN = 120; // Mais rápido (aim.cfg)
+        const SHOT_COOLDOWN = 120;
         let gameActive = false;
         let gamePaused = true;
         const keys = {};
 
-        // Mapa estilo competitivo
+        // Mapa
         const MAP_SIZE = 16;
         const CELL_SIZE = 48;
         const map = [
@@ -596,7 +599,30 @@
 
         const mapTemplate = JSON.parse(JSON.stringify(map));
 
-        // ===== SKINS PERSONALIZADAS =====
+        // ===== FUNÇÕES DE CONFIGURAÇÃO =====
+        function updateSens(value) {
+            config.sens = parseFloat(value);
+            document.getElementById('sens-value').innerHTML = value;
+        }
+
+        function updateCrosshairColor(color) {
+            config.crosshairColor = color;
+            document.querySelector('.crosshair-line.vertical').style.background = '#ff44ff';
+            document.querySelector('.crosshair-line.horizontal').style.background = color;
+            document.querySelector('.crosshair-dot').style.background = color;
+        }
+
+        function updatePlayerSkin(skin) {
+            config.playerSkin = skin;
+            loadEnemies();
+        }
+
+        function updateWeaponSkin(skin) {
+            config.weaponSkin = skin;
+            drawWeapon();
+        }
+
+        // ===== SKINS =====
         function getEnemyColor(team) {
             switch(config.playerSkin) {
                 case 'blue': return '#44aaff';
@@ -625,7 +651,7 @@
         }
         loadEnemies();
 
-        // ===== ARMA COM SKIN =====
+        // ===== ARMA =====
         function drawWeapon() {
             weaponCtx.clearRect(0, 0, 350, 250);
             
@@ -662,7 +688,7 @@
                 weaponCtx.fillRect(100, 140, 60, 40);
             }
             
-            // Detalhes (sempre dourados)
+            // Detalhes
             weaponCtx.fillStyle = '#ffd700';
             weaponCtx.fillRect(200, 130, 8, 8);
             weaponCtx.fillStyle = '#222';
@@ -685,19 +711,43 @@
             document.getElementById('config-panel').style.display = 'none';
         }
 
-        function applyConfig() {
-            config.sens = parseFloat(document.getElementById('sens').value);
-            config.crosshairColor = document.getElementById('crosshair-color').value;
-            config.playerSkin = document.getElementById('player-skin').value;
-            config.weaponSkin = document.getElementById('weapon-skin').value;
+        function resetGame() {
+            // Resetar jogador
+            player = {
+                x: 400,
+                y: 400,
+                angle: 0,
+                speed: 4,
+                health: 100,
+                armor: 100,
+                score: 0,
+                kills: 0,
+                currentWeapon: 'ak47',
+                weapons: {
+                    ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 38, name: 'AK-47' },
+                    awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 115, name: 'AWP' },
+                    deagle: { ammo: 7, reserve: 35, maxAmmo: 7, damage: 65, name: 'DEAGLE' }
+                }
+            };
             
-            // Atualizar cores da mira
-            document.querySelector('.crosshair-line.vertical').style.background = '#ff44ff';
-            document.querySelector('.crosshair-line.horizontal').style.background = config.crosshairColor;
-            document.querySelector('.crosshair-dot').style.background = config.crosshairColor;
+            // Resetar estatísticas
+            stats = {
+                kills: 0,
+                headshots: 0,
+                shotsFired: 0,
+                shotsHit: 0
+            };
             
-            drawWeapon();
-            closeConfig();
+            // Resetar mapa e inimigos
+            for (let y = 0; y < MAP_SIZE; y++) {
+                for (let x = 0; x < MAP_SIZE; x++) {
+                    map[y][x] = mapTemplate[y][x];
+                }
+            }
+            
+            loadEnemies();
+            updateHUD();
+            document.getElementById('menu-overlay').style.display = 'flex';
         }
 
         // Pointer Lock
@@ -745,7 +795,7 @@
             }
         });
 
-        // ===== TIRO COM AIM.CFG =====
+        // ===== TIRO CORRIGIDO =====
         function shoot() {
             const now = Date.now();
             if (now - lastShot < SHOT_COOLDOWN) return;
@@ -759,6 +809,9 @@
 
             weapon.ammo--;
             stats.shotsFired++;
+            
+            // Atualizar contador de tiros na tela
+            document.getElementById('tiros').innerHTML = stats.shotsFired;
             
             // Animação
             document.getElementById('weapon').classList.add('shoot');
@@ -782,7 +835,7 @@
                 let angleDiff = Math.abs(rayAngle - angleToEnemy);
                 if (angleDiff > Math.PI) angleDiff = 2*Math.PI - angleDiff;
                 
-                if (angleDiff < 0.08 && dist < hitDist) { // Mais preciso
+                if (angleDiff < 0.08 && dist < hitDist) {
                     if (!wallBetween(player.x, player.y, enemy.x, enemy.y)) {
                         hitEnemy = enemy;
                         hitDist = dist;
@@ -792,13 +845,15 @@
 
             if (hitEnemy) {
                 stats.shotsHit++;
+                document.getElementById('acertos').innerHTML = stats.shotsHit;
                 
                 let damage = weapon.damage;
-                const isHeadshot = Math.random() > 0.6; // Mais headshots
+                const isHeadshot = Math.random() > 0.6;
                 
                 if (isHeadshot) {
                     damage *= 2.5;
                     stats.headshots++;
+                    document.getElementById('headshots').innerHTML = stats.headshots;
                 }
                 
                 damage *= Math.max(0.6, 1 - hitDist / 600);
@@ -820,6 +875,9 @@
                     player.kills++;
                     stats.kills++;
                     
+                    // Atualizar kills na tela
+                    document.getElementById('kills').innerHTML = stats.kills;
+                    
                     addKillFeed('CT', 'TR', player.currentWeapon, isHeadshot);
                     showDamage(isHeadshot ? "HEADSHOT!" : "+100", isHeadshot ? "#ff4444" : "#ffff88");
                     
@@ -840,7 +898,7 @@
             marker.style.fontSize = '32px';
             setTimeout(() => {
                 marker.style.opacity = '0';
-            }, 150);
+            }, 100);
         }
 
         function showDamage(text, color) {
@@ -850,7 +908,7 @@
             indicator.style.opacity = '1';
             setTimeout(() => {
                 indicator.style.opacity = '0';
-            }, 300);
+            }, 200);
         }
 
         function addKillFeed(killer, victim, weapon, headshot) {
@@ -926,13 +984,13 @@
         }
 
         function render3D() {
-            // Céu escuro (mod style)
+            // Céu
             ctx.fillStyle = '#0f1217';
             ctx.fillRect(0, 0, WIDTH, HEIGHT/2);
             ctx.fillStyle = '#1a1f2a';
             ctx.fillRect(0, HEIGHT/2, WIDTH, HEIGHT/2);
             
-            const fov = Math.PI / 2.8; // FOV mais aberto
+            const fov = Math.PI / 2.8;
             const numRays = 512;
             const pixelSize = WIDTH / numRays;
             
@@ -975,11 +1033,9 @@
                 const x = i * pixelSize;
                 
                 if (hitEnemy) {
-                    // Inimigo com skin
                     ctx.fillStyle = hitEnemy.skin;
                     ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
                 } else if (hit) {
-                    // Parede com textura
                     const shade = Math.max(40, 255 - Math.min(215, distance / 1.8));
                     ctx.fillStyle = `rgb(${shade-20}, ${shade/2}, ${shade/4})`;
                     ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
@@ -1042,8 +1098,12 @@
             document.getElementById('armor').innerHTML = `🛡️ ${player.armor}`;
             document.getElementById('ammo').innerHTML = `${weapon.ammo}/${weapon.reserve}`;
             document.getElementById('score').innerHTML = `🏆 ${player.score}`;
+            
+            // Atualizar estatísticas
             document.getElementById('kills').innerHTML = stats.kills;
             document.getElementById('headshots').innerHTML = stats.headshots;
+            document.getElementById('tiros').innerHTML = stats.shotsFired;
+            document.getElementById('acertos').innerHTML = stats.shotsHit;
             
             const accuracy = stats.shotsFired > 0 ? Math.round((stats.shotsHit / stats.shotsFired) * 100) : 0;
             document.getElementById('accuracy').innerHTML = accuracy;
