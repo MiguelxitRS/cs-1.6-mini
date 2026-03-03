@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Counter-Strike 1.6 - Versão Corrigida</title>
+    <title>CS 1.6 MINI - VERSÃO SIMPLES</title>
     <style>
         * {
             margin: 0;
@@ -18,15 +18,14 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
+            font-family: Arial, sans-serif;
         }
 
         #game-container {
             position: relative;
             width: 900px;
             height: 600px;
-            border: 3px solid #5a4e3e;
+            border: 3px solid #ffd700;
             border-radius: 8px;
             overflow: hidden;
         }
@@ -41,310 +40,64 @@
             display: block;
         }
 
-        /* HUD */
+        /* HUD simples */
         #hud {
             position: absolute;
             top: 10px;
             left: 10px;
-            right: 10px;
-            display: flex;
-            justify-content: space-between;
-            color: #ffd700;
-            text-shadow: 2px 2px 0 #000;
-            font-weight: bold;
-            font-size: 18px;
-            z-index: 20;
-            pointer-events: none;
-        }
-
-        .hud-item {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 15px;
-            border-radius: 4px;
-            border: 1px solid #5a4e3e;
-        }
-
-        #health { color: #ff4444; }
-        #armor { color: #44aaff; }
-        #ammo { color: #ffd700; }
-        #score { color: #44ff44; }
-
-        #team-score {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
             color: #ffd700;
             font-size: 20px;
             font-weight: bold;
-            display: flex;
-            gap: 30px;
-            z-index: 22;
+            text-shadow: 2px 2px 0 #000;
+            z-index: 10;
         }
 
-        .ct-score { color: #44aaff; }
-        .tr-score { color: #ff4444; }
+        #instrucoes {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            z-index: 10;
+        }
 
-        #timer {
+        #botao-iniciar {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffd700;
+            color: #000;
+            border: none;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 0 20px #ffd700;
+        }
+
+        #botao-iniciar:hover {
+            background: #ffed4a;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        #status {
             position: absolute;
             top: 50px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
             color: #ffd700;
-            padding: 5px 15px;
-            border-radius: 4px;
-            border: 1px solid #ffd700;
-            font-size: 24px;
-            z-index: 21;
-        }
-
-        #kill-feed {
-            position: absolute;
-            top: 100px;
-            right: 10px;
-            color: #fff;
-            font-size: 14px;
-            z-index: 21;
-            max-width: 300px;
-            text-align: right;
-        }
-
-        .kill-feed-item {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 4px 8px;
-            margin-bottom: 2px;
-            border-right: 3px solid #ffd700;
-            animation: fadeOut 3s forwards;
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        #radar {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 150px;
-            height: 150px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #5a4e3e;
-            border-radius: 4px;
-            z-index: 35;
-            overflow: hidden;
-        }
-
-        #radar canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        #weapon {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            width: 300px;
-            height: 200px;
-            z-index: 25;
-            pointer-events: none;
-        }
-
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            z-index: 30;
-            pointer-events: none;
-        }
-
-        .crosshair-line {
-            position: absolute;
-            background: #fff;
-        }
-
-        .crosshair-line.vertical {
-            width: 2px;
-            height: 20px;
-            left: 19px;
-            top: 10px;
-        }
-
-        .crosshair-line.horizontal {
-            width: 20px;
-            height: 2px;
-            top: 19px;
-            left: 10px;
-        }
-
-        #instructions {
-            position: absolute;
-            bottom: 10px;
-            left: 170px;
-            color: #aaa;
-            font-size: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            z-index: 20;
-        }
-
-        #pause-btn, #restart-btn {
-            position: absolute;
-            background: #5a4e3e;
-            color: #ffd700;
-            border: 1px solid #ffd700;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            z-index: 40;
-        }
-
-        #pause-btn {
-            top: 10px;
-            right: 10px;
-        }
-
-        #restart-btn {
-            bottom: 10px;
-            right: 10px;
-        }
-
-        #kill-message {
-            position: absolute;
-            top: 200px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ffd700;
-            font-size: 28px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            z-index: 50;
-            pointer-events: none;
-        }
-
-        #kill-message.show {
-            opacity: 1;
-        }
-
-        #money {
-            position: absolute;
-            top: 80px;
-            left: 10px;
-            color: #44ff44;
+            font-size: 18px;
             background: rgba(0,0,0,0.7);
             padding: 5px 15px;
             border-radius: 4px;
             border: 1px solid #ffd700;
-            z-index: 20;
-        }
-
-        /* Menu de pausa */
-        #pause-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 100;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .menu-content {
-            background: #1a1f2a;
-            border: 3px solid #5a4e3e;
-            border-radius: 8px;
-            padding: 30px;
-            width: 400px;
-            color: #ffd700;
-        }
-
-        .menu-content h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #5a4e3e;
-            padding-bottom: 10px;
-        }
-
-        .setting-item {
-            margin-bottom: 15px;
-        }
-
-        .setting-item label {
-            display: block;
-            color: #aaa;
-            margin-bottom: 5px;
-        }
-
-        .setting-item input[type="range"] {
-            width: 100%;
-        }
-
-        .menu-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-
-        .menu-btn {
-            flex: 1;
-            background: #5a4e3e;
-            color: #ffd700;
-            border: 1px solid #ffd700;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .menu-btn.primary {
-            background: #ffd700;
-            color: #1a1f2a;
-        }
-
-        #pause-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #ffd700;
-            font-size: 48px;
-            z-index: 90;
-            display: none;
-            pointer-events: none;
-        }
-
-        #pointer-lock-info {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
-            color: #ffd700;
-            padding: 40px;
-            border-radius: 8px;
-            border: 3px solid #ffd700;
-            text-align: center;
-            z-index: 1000;
-            display: none;
-        }
-
-        #pointer-lock-info button {
-            margin-top: 20px;
-            padding: 15px 40px;
-            background: #ffd700;
-            color: #000;
-            border: none;
-            border-radius: 4px;
-            font-size: 18px;
-            cursor: pointer;
+            z-index: 10;
         }
     </style>
 </head>
@@ -353,524 +106,222 @@
         <canvas id="canvas-3d"></canvas>
         
         <div id="hud">
-            <div class="hud-item" id="health">❤️ 100</div>
-            <div class="hud-item" id="armor">🛡️ 100</div>
-            <div class="hud-item" id="weapon-icon">🔫 AK-47</div>
-            <div class="hud-item" id="ammo">30/90</div>
-            <div class="hud-item" id="score">🏆 0</div>
+            <div>Posição: <span id="pos-x">300</span>, <span id="pos-y">300</span></div>
+            <div>Ângulo: <span id="angulo">0</span></div>
+            <div>Pontos: <span id="pontos">0</span></div>
         </div>
 
-        <div id="team-score">
-            <span class="ct-score">CT 0</span>
-            <span class="tr-score">TR 0</span>
-        </div>
-
-        <div id="timer">01:45</div>
-        <div id="money">💰 $800</div>
-        <div id="kill-feed"></div>
-
-        <div id="radar">
-            <canvas id="radar-canvas" width="150" height="150"></canvas>
-        </div>
-
-        <canvas id="weapon" width="300" height="200"></canvas>
-
-        <div id="crosshair">
-            <div class="crosshair-line vertical"></div>
-            <div class="crosshair-line horizontal"></div>
-        </div>
-
-        <div id="instructions">WASD=Mover | Clique no jogo=Atirar | ESC=Pausa | R=Recarregar | 1-3=Armas</div>
-
-        <button id="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
-        <button id="restart-btn" onclick="restartGame()">NOVA PARTIDA</button>
-
-        <div id="kill-message">HEADSHOT!</div>
-        <div id="pause-indicator">⏸️ PAUSA</div>
-
-        <div id="pointer-lock-info">
-            <p>🎮 COUNTER-STRIKE 1.6</p>
-            <p>Clique no botão para começar</p>
-            <p>WASD = Mover | Mouse = Mirar</p>
-            <button onclick="requestPointerLock()">✅ ENTRAR NO JOGO</button>
-        </div>
-
-        <div id="pause-menu">
-            <div class="menu-content">
-                <h2>⚙️ CONFIGURAÇÕES</h2>
-                
-                <div class="setting-item">
-                    <label>Sensibilidade <span id="sens-value">2.0</span></label>
-                    <input type="range" id="mouse-sens" min="0.5" max="5" value="2" step="0.1">
-                </div>
-                
-                <div class="setting-item">
-                    <label>Inverter Mouse</label>
-                    <input type="checkbox" id="invert-mouse">
-                </div>
-
-                <div class="menu-buttons">
-                    <button class="menu-btn primary" onclick="saveSettings()">SALVAR</button>
-                    <button class="menu-btn" onclick="resetToDefaults()">PADRÃO</button>
-                    <button class="menu-btn" onclick="togglePause()">VOLTAR</button>
-                </div>
-            </div>
-        </div>
+        <div id="status">🚀 Clique no botão para começar</div>
+        <div id="instrucoes">WASD = Andar | Mouse = Olhar | Clique = Atirar</div>
+        
+        <button id="botao-iniciar" onclick="iniciarJogo()">🎮 ENTRAR NO JOGO</button>
     </div>
 
     <script>
-        // Configuração inicial
+        // Configuração básica
         const canvas = document.getElementById('canvas-3d');
         const ctx = canvas.getContext('2d');
-        const weaponCanvas = document.getElementById('weapon');
-        const weaponCtx = weaponCanvas.getContext('2d');
-        const radarCanvas = document.getElementById('radar-canvas');
-        const radarCtx = radarCanvas.getContext('2d');
-
-        const WIDTH = 900;
-        const HEIGHT = 600;
-        canvas.width = WIDTH;
-        canvas.height = WEIGHT; // CORRIGIDO: era WEIGHT, agora é HEIGHT
-
-        // Configurações
-        let settings = {
-            mouseSensitivity: 2.0,
-            invertMouse: false
-        };
+        
+        canvas.width = 900;
+        canvas.height = 600;
 
         // Jogador
         let player = {
             x: 300,
             y: 300,
-            angle: 0,
-            speed: 3,
-            health: 100,
-            armor: 100,
-            score: 0,
-            money: 800,
-            kills: 0,
-            currentWeapon: 'ak47',
-            weapons: {
-                ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35 },
-                awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100 },
-                pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25 }
-            }
+            angulo: 0,
+            velocidade: 3,
+            pontos: 0
         };
 
-        // Estado do jogo
-        let gamePaused = false;
-        let gameActive = true;
-        let trScore = 0;
-        let roundTime = 105;
-        let lastShot = 0;
-        const keys = {};
+        // Controles
+        let teclas = {};
+        let mouseTravado = false;
+        let jogoAtivo = false;
 
-        // Mapa
-        const MAP_SIZE = 16;
-        const CELL_SIZE = 40;
-        const map = [
+        // Mapa simples (1 = parede)
+        const mapa = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,2,0,0,0,0,2,0,0,0,0,1],
-            [1,0,2,0,0,0,0,0,0,0,0,0,0,2,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,2,0,0,0,0,2,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,2,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,2,0,0,0,0,2,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        // Inimigos
-        let enemies = [];
-        function loadEnemies() {
-            enemies = [];
-            for (let y = 0; y < MAP_SIZE; y++) {
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    if (map[y][x] === 2) {
-                        enemies.push({
-                            x: x * CELL_SIZE + CELL_SIZE/2,
-                            y: y * CELL_SIZE + CELL_SIZE/2,
-                            health: 100,
-                            alive: true
-                        });
-                    }
-                }
-            }
-        }
-        loadEnemies();
+        const TAMANHO_CELULA = 40;
+        const MAPA_TAMANHO = 16;
 
-        // Timer
-        setInterval(() => {
-            if (!gamePaused && gameActive && roundTime > 0) {
-                roundTime--;
-                updateTimer();
-            }
-        }, 1000);
-
-        function updateTimer() {
-            const minutes = Math.floor(roundTime / 60);
-            const seconds = roundTime % 60;
-            document.getElementById('timer').innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        // Pointer Lock
-        function requestPointerLock() {
-            canvas.requestPointerLock();
-            document.getElementById('pointer-lock-info').style.display = 'none';
-        }
-
-        document.addEventListener('pointerlockchange', () => {
-            if (document.pointerLockElement === canvas) {
-                document.addEventListener('mousemove', updateCamera);
-            } else {
-                document.removeEventListener('mousemove', updateCamera);
-            }
-        });
-
-        function updateCamera(e) {
-            if (gamePaused || !gameActive) return;
-            const movementX = e.movementX || 0;
-            let angleChange = movementX * settings.mouseSensitivity * 0.002;
-            if (settings.invertMouse) angleChange = -angleChange;
-            player.angle += angleChange;
-        }
-
-        // Controles
-        document.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
-            keys[key] = true;
+        // Iniciar jogo
+        function iniciarJogo() {
+            document.getElementById('botao-iniciar').style.display = 'none';
+            document.getElementById('status').innerHTML = '🎯 Mouse travado! Use WASD e mouse';
             
-            if (e.key === '1') player.currentWeapon = 'ak47';
-            if (e.key === '2') player.currentWeapon = 'awp';
-            if (e.key === '3') player.currentWeapon = 'pistol';
-            if (e.key === 'r') reload();
-            if (e.key === 'Escape') togglePause();
+            canvas.requestPointerLock();
+            mouseTravado = true;
+            jogoAtivo = true;
+        }
+
+        // Eventos de teclado
+        document.addEventListener('keydown', (e) => {
+            teclas[e.key.toLowerCase()] = true;
         });
 
         document.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            keys[key] = false;
+            teclas[e.key.toLowerCase()] = false;
+        });
+
+        // Eventos do mouse
+        document.addEventListener('mousemove', (e) => {
+            if (!jogoAtivo || !mouseTravado) return;
+            
+            // Movimenta a câmera com o mouse
+            player.angulo += e.movementX * 0.005;
         });
 
         canvas.addEventListener('click', () => {
-            if (!gamePaused && gameActive && document.pointerLockElement === canvas) {
-                shoot();
+            if (!jogoAtivo) return;
+            
+            // Tiro
+            player.pontos += 10;
+            document.getElementById('pontos').innerHTML = player.pontos;
+            
+            // Feedback visual
+            ctx.fillStyle = '#ffff00';
+            ctx.fillRect(450, 300, 10, 10);
+            setTimeout(() => {}, 50);
+        });
+
+        // Sair do mouse travado com ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && mouseTravado) {
+                document.exitPointerLock();
+                mouseTravado = false;
+                jogoAtivo = false;
+                document.getElementById('botao-iniciar').style.display = 'block';
+                document.getElementById('status').innerHTML = '🚀 Clique no botão para começar';
             }
         });
 
-        // Funções do jogo
-        function shoot() {
-            const now = Date.now();
-            if (now - lastShot < 200) return;
-            lastShot = now;
+        // Movimento do jogador
+        function moverJogador() {
+            if (!jogoAtivo || !mouseTravado) return;
 
-            const weapon = player.weapons[player.currentWeapon];
-            if (weapon.ammo <= 0) {
-                showKillMessage("SEM MUNIÇÃO!", "#ff4444");
-                return;
+            let novoX = player.x;
+            let novoY = player.y;
+
+            if (teclas['w']) {
+                novoX += Math.cos(player.angulo) * player.velocidade;
+                novoY += Math.sin(player.angulo) * player.velocidade;
+            }
+            if (teclas['s']) {
+                novoX -= Math.cos(player.angulo) * player.velocidade;
+                novoY -= Math.sin(player.angulo) * player.velocidade;
+            }
+            if (teclas['a']) {
+                novoX += Math.cos(player.angulo - Math.PI/2) * player.velocidade;
+                novoY += Math.sin(player.angulo - Math.PI/2) * player.velocidade;
+            }
+            if (teclas['d']) {
+                novoX += Math.cos(player.angulo + Math.PI/2) * player.velocidade;
+                novoY += Math.sin(player.angulo + Math.PI/2) * player.velocidade;
             }
 
-            weapon.ammo--;
-            
-            // Raycast
-            let hitEnemy = null;
-            let hitDist = Infinity;
+            // Colisão com paredes
+            const mapaX = Math.floor(novoX / TAMANHO_CELULA);
+            const mapaY = Math.floor(novoY / TAMANHO_CELULA);
 
-            enemies.forEach(enemy => {
-                if (!enemy.alive) return;
-                
-                const dx = enemy.x - player.x;
-                const dy = enemy.y - player.y;
-                const dist = Math.sqrt(dx*dx + dy*dy);
-                
-                if (dist > 300) return;
-                
-                const angleToEnemy = Math.atan2(dy, dx);
-                let angleDiff = Math.abs(player.angle - angleToEnemy);
-                if (angleDiff > Math.PI) angleDiff = 2*Math.PI - angleDiff;
-                
-                if (angleDiff < 0.1 && dist < hitDist) {
-                    if (!wallBetween(player.x, player.y, enemy.x, enemy.y)) {
-                        hitEnemy = enemy;
-                        hitDist = dist;
-                    }
-                }
-            });
-
-            if (hitEnemy) {
-                hitEnemy.alive = false;
-                player.score += 100;
-                player.money += 300;
-                player.kills++;
-                trScore++;
-                
-                addKillFeed('CT', 'TR', player.currentWeapon);
-                showKillMessage("+100", "#ffd700");
-                
-                document.querySelector('.ct-score').innerHTML = `CT ${player.kills}`;
-                document.querySelector('.tr-score').innerHTML = `TR ${trScore}`;
+            if (mapa[mapaY] && mapa[mapaY][mapaX] !== 1) {
+                player.x = novoX;
+                player.y = novoY;
             }
 
-            updateHUD();
+            // Atualizar HUD
+            document.getElementById('pos-x').innerHTML = Math.round(player.x);
+            document.getElementById('pos-y').innerHTML = Math.round(player.y);
+            document.getElementById('angulo').innerHTML = Math.round(player.angulo * 180 / Math.PI);
         }
 
-        function wallBetween(x1, y1, x2, y2) {
-            const steps = 10;
-            for (let i = 1; i <= steps; i++) {
-                const t = i / steps;
-                const checkX = x1 + (x2 - x1) * t;
-                const checkY = y1 + (y2 - y1) * t;
-                const mapX = Math.floor(checkX / CELL_SIZE);
-                const mapY = Math.floor(checkY / CELL_SIZE);
-                if (map[mapY] && map[mapY][mapX] === 1) return true;
-            }
-            return false;
-        }
+        // Renderização 3D simples
+        function renderizar() {
+            // Limpar tela
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, 900, 600);
 
-        function reload() {
-            const weapon = player.weapons[player.currentWeapon];
-            if (weapon.reserve > 0 && weapon.ammo < weapon.maxAmmo) {
-                const needed = weapon.maxAmmo - weapon.ammo;
-                const reloadAmount = Math.min(needed, weapon.reserve);
-                weapon.ammo += reloadAmount;
-                weapon.reserve -= reloadAmount;
-                showKillMessage("RECARREGANDO...", "#44ff44");
-                updateHUD();
-            }
-        }
-
-        function addKillFeed(killer, victim, weapon) {
-            const feed = document.getElementById('kill-feed');
-            const item = document.createElement('div');
-            item.className = 'kill-feed-item';
-            
-            let weaponName = weapon === 'ak47' ? 'AK47' : weapon === 'awp' ? 'AWP' : 'GLOCK';
-            item.innerHTML = `${killer} [${weaponName}] ${victim}`;
-            feed.appendChild(item);
-            
-            setTimeout(() => item.remove(), 3000);
-        }
-
-        function movePlayer() {
-            if (!gameActive || gamePaused) return;
-            
-            let newX = player.x;
-            let newY = player.y;
-            
-            if (keys['w']) {
-                newX += Math.cos(player.angle) * player.speed;
-                newY += Math.sin(player.angle) * player.speed;
-            }
-            if (keys['s']) {
-                newX -= Math.cos(player.angle) * player.speed;
-                newY -= Math.sin(player.angle) * player.speed;
-            }
-            if (keys['a']) {
-                newX += Math.cos(player.angle - Math.PI/2) * player.speed;
-                newY += Math.sin(player.angle - Math.PI/2) * player.speed;
-            }
-            if (keys['d']) {
-                newX += Math.cos(player.angle + Math.PI/2) * player.speed;
-                newY += Math.sin(player.angle + Math.PI/2) * player.speed;
-            }
-            
-            const mapX = Math.floor(newX / CELL_SIZE);
-            const mapY = Math.floor(newY / CELL_SIZE);
-            
-            if (map[mapY] && map[mapY][mapX] !== 1) {
-                player.x = newX;
-                player.y = newY;
-            }
-        }
-
-        function render3D() {
             // Céu e chão
-            ctx.fillStyle = '#0a1a2a';
-            ctx.fillRect(0, 0, WIDTH, HEIGHT/2);
-            ctx.fillStyle = '#2a3a2a';
-            ctx.fillRect(0, HEIGHT/2, WIDTH, HEIGHT/2);
-            
-            const fov = Math.PI / 3;
-            const numRays = 450; // Valor fixo para evitar bugs
-            
-            for (let i = 0; i < numRays; i++) {
-                const rayAngle = player.angle - fov/2 + (i / numRays) * fov;
+            ctx.fillStyle = '#1a3355';
+            ctx.fillRect(0, 0, 900, 300);
+            ctx.fillStyle = '#553322';
+            ctx.fillRect(0, 300, 900, 300);
+
+            const FOV = Math.PI / 3;
+            const NUM_RAIOS = 300;
+
+            for (let i = 0; i < NUM_RAIOS; i++) {
+                const anguloRaio = player.angulo - FOV/2 + (i / NUM_RAIOS) * FOV;
                 
-                let distance = 0;
+                let distancia = 0;
                 let hit = false;
-                let hitType = 0;
                 
-                while (!hit && distance < 800) {
-                    distance += 5;
-                    const rayX = player.x + Math.cos(rayAngle) * distance;
-                    const rayY = player.y + Math.sin(rayAngle) * distance;
+                while (!hit && distancia < 800) {
+                    distancia += 5;
                     
-                    const mapX = Math.floor(rayX / CELL_SIZE);
-                    const mapY = Math.floor(rayY / CELL_SIZE);
+                    const raioX = player.x + Math.cos(anguloRaio) * distancia;
+                    const raioY = player.y + Math.sin(anguloRaio) * distancia;
                     
-                    if (mapX < 0 || mapX >= MAP_SIZE || mapY < 0 || mapY >= MAP_SIZE) {
+                    const mapaX = Math.floor(raioX / TAMANHO_CELULA);
+                    const mapaY = Math.floor(raioY / TAMANHO_CELULA);
+                    
+                    if (mapaX < 0 || mapaX >= MAPA_TAMANHO || mapaY < 0 || mapaY >= MAPA_TAMANHO) {
                         hit = true;
-                    } else if (map[mapY][mapX] === 1) {
+                    } else if (mapa[mapaY][mapaX] === 1) {
                         hit = true;
-                        hitType = 1;
-                    } else {
-                        for (let e of enemies) {
-                            if (!e.alive) continue;
-                            const dx = rayX - e.x;
-                            const dy = rayY - e.y;
-                            if (Math.sqrt(dx*dx + dy*dy) < 15) {
-                                hit = true;
-                                hitType = 2;
-                                break;
-                            }
-                        }
                     }
                 }
                 
-                const correctDistance = distance * Math.cos(rayAngle - player.angle);
-                const wallHeight = Math.min(HEIGHT, (CELL_SIZE * HEIGHT) / Math.max(correctDistance, 1));
+                // Corrigir distorção
+                const distanciaCorrigida = distancia * Math.cos(anguloRaio - player.angulo);
                 
-                const x = i * 2; // Pixel size fixo
+                // Altura da parede
+                const alturaParede = Math.min(600, (TAMANHO_CELULA * 600) / Math.max(distanciaCorrigida, 1));
                 
-                if (hitType === 1) {
-                    const shade = Math.max(50, 255 - Math.min(200, distance / 2));
-                    ctx.fillStyle = `rgb(${shade}, ${shade/2}, ${shade/4})`;
-                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, 2, wallHeight);
-                } else if (hitType === 2) {
-                    ctx.fillStyle = '#ff4444';
-                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, 2, wallHeight);
-                }
+                // Cor baseada na distância
+                const brilho = Math.max(50, 255 - Math.min(200, distancia / 2));
+                
+                // Desenhar coluna
+                ctx.fillStyle = `rgb(${brilho}, ${brilho/2}, ${brilho/4})`;
+                ctx.fillRect(i * 3, 300 - alturaParede/2, 3, alturaParede);
             }
+
+            // Desenhar mira
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(445, 295);
+            ctx.lineTo(455, 305);
+            ctx.moveTo(455, 295);
+            ctx.lineTo(445, 305);
+            ctx.stroke();
         }
 
-        function drawRadar() {
-            radarCtx.clearRect(0, 0, 150, 150);
-            radarCtx.fillStyle = '#0a1f1f';
-            radarCtx.fillRect(0, 0, 150, 150);
-            
-            const cellSize = 150 / MAP_SIZE;
-            
-            for (let y = 0; y < MAP_SIZE; y++) {
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    if (map[y][x] === 1) {
-                        radarCtx.fillStyle = '#8b6b4d';
-                        radarCtx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
-                    }
-                }
-            }
-            
-            // Jogador
-            radarCtx.fillStyle = '#44ff44';
-            radarCtx.beginPath();
-            radarCtx.arc(75, 75, 4, 0, 2*Math.PI);
-            radarCtx.fill();
-        }
-
-        function drawWeapon() {
-            weaponCtx.clearRect(0, 0, 300, 200);
-            weaponCtx.fillStyle = '#333';
-            weaponCtx.fillRect(150, 150, 100, 15);
-            weaponCtx.fillRect(230, 140, 25, 30);
-            weaponCtx.fillStyle = '#666';
-            weaponCtx.fillRect(100, 140, 50, 30);
-        }
-
-        function updateHUD() {
-            const weapon = player.weapons[player.currentWeapon];
-            document.getElementById('health').innerHTML = `❤️ ${player.health}`;
-            document.getElementById('armor').innerHTML = `🛡️ ${player.armor}`;
-            document.getElementById('ammo').innerHTML = `${weapon.ammo}/${weapon.reserve}`;
-            document.getElementById('score').innerHTML = `🏆 ${player.score}`;
-            document.getElementById('money').innerHTML = `💰 $${player.money}`;
-        }
-
-        function showKillMessage(text, color) {
-            const msg = document.getElementById('kill-message');
-            msg.textContent = text;
-            msg.style.color = color;
-            msg.classList.add('show');
-            setTimeout(() => msg.classList.remove('show'), 800);
-        }
-
-        function togglePause() {
-            gamePaused = !gamePaused;
-            document.getElementById('pause-menu').style.display = gamePaused ? 'flex' : 'none';
-            document.getElementById('pause-indicator').style.display = gamePaused ? 'block' : 'none';
-        }
-
-        function saveSettings() {
-            settings.mouseSensitivity = parseFloat(document.getElementById('mouse-sens').value);
-            settings.invertMouse = document.getElementById('invert-mouse').checked;
-            document.getElementById('sens-value').textContent = settings.mouseSensitivity.toFixed(1);
-            togglePause();
-        }
-
-        function resetToDefaults() {
-            document.getElementById('mouse-sens').value = 2.0;
-            document.getElementById('invert-mouse').checked = false;
-            document.getElementById('sens-value').textContent = '2.0';
-        }
-
-        function restartGame() {
-            player = {
-                x: 300,
-                y: 300,
-                angle: 0,
-                speed: 3,
-                health: 100,
-                armor: 100,
-                score: 0,
-                money: 800,
-                kills: 0,
-                currentWeapon: 'ak47',
-                weapons: {
-                    ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35 },
-                    awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100 },
-                    pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25 }
-                }
-            };
-            
-            trScore = 0;
-            roundTime = 105;
-            loadEnemies();
-            
-            document.querySelector('.ct-score').innerHTML = `CT 0`;
-            document.querySelector('.tr-score').innerHTML = `TR 0`;
-            updateTimer();
-            updateHUD();
-            
-            if (gamePaused) togglePause();
-        }
-
+        // Game loop
         function gameLoop() {
-            if (gameActive && !gamePaused) {
-                movePlayer();
-            }
-            render3D();
-            drawWeapon();
-            drawRadar();
+            moverJogador();
+            renderizar();
             requestAnimationFrame(gameLoop);
         }
 
-        // Inicialização
-        updateHUD();
-        updateTimer();
         gameLoop();
-
-        setTimeout(() => {
-            if (document.pointerLockElement !== canvas) {
-                document.getElementById('pointer-lock-info').style.display = 'block';
-            }
-        }, 1000);
-
-        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     </script>
 </body>
 </html>
