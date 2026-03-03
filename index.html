@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 MINI - COMPLETO</title>
+    <title>Counter-Strike 1.6 - Versão Corrigida</title>
     <style>
         * {
             margin: 0;
@@ -18,7 +18,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Courier New', monospace;
             overflow: hidden;
         }
 
@@ -31,7 +31,6 @@
             overflow: hidden;
         }
 
-        /* Canvas 3D principal */
         #canvas-3d {
             position: absolute;
             top: 0;
@@ -42,7 +41,7 @@
             display: block;
         }
 
-        /* HUD sobreposto */
+        /* HUD */
         #hud {
             position: absolute;
             top: 10px;
@@ -63,46 +62,59 @@
             padding: 8px 15px;
             border-radius: 4px;
             border: 1px solid #5a4e3e;
-            backdrop-filter: blur(2px);
         }
 
-        #health {
-            color: #ff4444;
-        }
+        #health { color: #ff4444; }
+        #armor { color: #44aaff; }
+        #ammo { color: #ffd700; }
+        #score { color: #44ff44; }
 
-        #armor {
-            color: #44aaff;
-        }
-
-        #ammo {
+        #team-score {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             color: #ffd700;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            gap: 30px;
+            z-index: 22;
         }
 
-        #score {
-            color: #44ff44;
-        }
+        .ct-score { color: #44aaff; }
+        .tr-score { color: #ff4444; }
 
-        #weapon-icon {
-            color: #ffffff;
+        #timer {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: #ffd700;
+            padding: 5px 15px;
+            border-radius: 4px;
+            border: 1px solid #ffd700;
+            font-size: 24px;
+            z-index: 21;
         }
 
         #kill-feed {
             position: absolute;
-            top: 80px;
-            left: 10px;
+            top: 100px;
+            right: 10px;
             color: #fff;
             font-size: 14px;
-            text-shadow: 1px 1px 0 #000;
             z-index: 21;
-            pointer-events: none;
             max-width: 300px;
+            text-align: right;
         }
 
         .kill-feed-item {
             background: rgba(0, 0, 0, 0.6);
             padding: 4px 8px;
             margin-bottom: 2px;
-            border-left: 3px solid #ffd700;
+            border-right: 3px solid #ffd700;
             animation: fadeOut 3s forwards;
         }
 
@@ -120,7 +132,7 @@
             height: 150px;
             background: rgba(0, 0, 0, 0.8);
             border: 2px solid #5a4e3e;
-            border-radius: 50%;
+            border-radius: 4px;
             z-index: 35;
             overflow: hidden;
         }
@@ -130,20 +142,16 @@
             height: 100%;
         }
 
-        #weapon-display {
+        #weapon {
             position: absolute;
             bottom: 10px;
-            left: 170px;
-            color: #fff;
-            background: rgba(0,0,0,0.6);
-            padding: 5px 10px;
-            border-radius: 4px;
-            border: 1px solid #ffd700;
-            font-size: 14px;
+            right: 20px;
+            width: 300px;
+            height: 200px;
             z-index: 25;
+            pointer-events: none;
         }
 
-        /* Mira central */
         #crosshair {
             position: absolute;
             top: 50%;
@@ -157,8 +165,7 @@
 
         .crosshair-line {
             position: absolute;
-            background: #ffffff;
-            box-shadow: 0 0 5px #ff0000;
+            background: #fff;
         }
 
         .crosshair-line.vertical {
@@ -175,67 +182,9 @@
             left: 10px;
         }
 
-        .crosshair-dot {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #ff0000;
-            border-radius: 50%;
-            top: 18px;
-            left: 18px;
-            box-shadow: 0 0 5px #ff0000;
-        }
-
-        /* Arma na mão */
-        #weapon {
-            position: absolute;
-            bottom: 10px;
-            right: 20px;
-            width: 300px;
-            height: 200px;
-            z-index: 25;
-            pointer-events: none;
-            image-rendering: pixelated;
-            transform-origin: bottom right;
-            transition: transform 0.05s;
-        }
-
-        #weapon.shoot {
-            transform: scale(0.95) translateX(5px) translateY(5px);
-        }
-
-        #weapon.reload {
-            animation: weaponReload 0.5s ease;
-        }
-
-        @keyframes weaponReload {
-            0% { transform: rotate(0deg); }
-            30% { transform: rotate(-10deg) translateX(-10px); }
-            70% { transform: rotate(5deg) translateX(5px); }
-            100% { transform: rotate(0deg); }
-        }
-
-        /* Efeitos de sangue */
-        .blood-effect {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #f00;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 40;
-            animation: bloodFade 0.5s forwards;
-        }
-
-        @keyframes bloodFade {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(2); opacity: 0; }
-        }
-
-        /* Instruções */
         #instructions {
             position: absolute;
-            bottom: 50px;
+            bottom: 10px;
             left: 170px;
             color: #aaa;
             font-size: 12px;
@@ -245,33 +194,34 @@
             z-index: 20;
         }
 
-        #restart-btn {
+        #pause-btn, #restart-btn {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
             background: #5a4e3e;
             color: #ffd700;
             border: 1px solid #ffd700;
-            padding: 5px 15px;
+            padding: 5px 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
             z-index: 40;
         }
 
-        #restart-btn:hover {
-            background: #6b5e4e;
+        #pause-btn {
+            top: 10px;
+            right: 10px;
+        }
+
+        #restart-btn {
+            bottom: 10px;
+            right: 10px;
         }
 
         #kill-message {
             position: absolute;
-            top: 100px;
+            top: 200px;
             left: 50%;
             transform: translateX(-50%);
             color: #ffd700;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #000, 0 0 10px #ff0000;
+            font-size: 28px;
             opacity: 0;
             transition: opacity 0.3s;
             z-index: 50;
@@ -280,47 +230,18 @@
 
         #kill-message.show {
             opacity: 1;
-            animation: killFlash 0.5s ease;
-        }
-
-        @keyframes killFlash {
-            0% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.2); }
-            100% { transform: translateX(-50%) scale(1); }
         }
 
         #money {
             position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 80px;
+            left: 10px;
             color: #44ff44;
             background: rgba(0,0,0,0.7);
             padding: 5px 15px;
             border-radius: 4px;
             border: 1px solid #ffd700;
-            font-weight: bold;
             z-index: 20;
-        }
-
-        /* Botão de pausa */
-        #pause-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: #ffd700;
-            border: 1px solid #ffd700;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            z-index: 45;
-            font-size: 14px;
-        }
-
-        #pause-btn:hover {
-            background: #5a4e3e;
         }
 
         /* Menu de pausa */
@@ -335,7 +256,6 @@
             display: none;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(5px);
         }
 
         .menu-content {
@@ -345,27 +265,13 @@
             padding: 30px;
             width: 400px;
             color: #ffd700;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
         }
 
         .menu-content h2 {
             text-align: center;
             margin-bottom: 25px;
-            font-size: 28px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
             border-bottom: 2px solid #5a4e3e;
             padding-bottom: 10px;
-        }
-
-        .menu-section {
-            margin-bottom: 25px;
-        }
-
-        .menu-section h3 {
-            color: #fff;
-            margin-bottom: 15px;
-            font-size: 18px;
         }
 
         .setting-item {
@@ -375,45 +281,11 @@
         .setting-item label {
             display: block;
             color: #aaa;
-            font-size: 14px;
             margin-bottom: 5px;
         }
 
         .setting-item input[type="range"] {
             width: 100%;
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .setting-item input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            background: #ffd700;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .setting-item input[type="range"]::-moz-range-thumb {
-            width: 15px;
-            height: 15px;
-            background: #ffd700;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .setting-item input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-
-        .setting-value {
-            float: right;
-            color: #ffd700;
         }
 
         .menu-buttons {
@@ -430,14 +302,6 @@
             padding: 10px;
             border-radius: 4px;
             cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .menu-btn:hover {
-            background: #6b5e4e;
-            transform: scale(1.02);
         }
 
         .menu-btn.primary {
@@ -445,11 +309,6 @@
             color: #1a1f2a;
         }
 
-        .menu-btn.primary:hover {
-            background: #ffed4a;
-        }
-
-        /* Indicador de pausa */
         #pause-indicator {
             position: absolute;
             top: 50%;
@@ -457,78 +316,42 @@
             transform: translate(-50%, -50%);
             color: #ffd700;
             font-size: 48px;
-            font-weight: bold;
-            text-shadow: 0 0 20px #000;
             z-index: 90;
             display: none;
             pointer-events: none;
-            animation: pulse 1.5s infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
-
-        #save-notification {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: #44ff44;
-            padding: 10px 20px;
-            border-radius: 4px;
-            border: 1px solid #44ff44;
-            font-weight: bold;
-            z-index: 200;
-            display: none;
-            animation: fadeInOut 2s ease;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; bottom: 60px; }
-            20% { opacity: 1; bottom: 80px; }
-            80% { opacity: 1; bottom: 80px; }
-            100% { opacity: 0; bottom: 100px; }
-        }
-
-        /* Aviso de mouse travado */
         #pointer-lock-info {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.95);
             color: #ffd700;
-            padding: 20px;
+            padding: 40px;
             border-radius: 8px;
-            border: 2px solid #ffd700;
-            font-size: 18px;
+            border: 3px solid #ffd700;
             text-align: center;
             z-index: 1000;
             display: none;
         }
 
         #pointer-lock-info button {
-            margin-top: 15px;
-            padding: 8px 20px;
+            margin-top: 20px;
+            padding: 15px 40px;
             background: #ffd700;
             color: #000;
             border: none;
             border-radius: 4px;
-            font-weight: bold;
+            font-size: 18px;
             cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- Canvas 3D -->
         <canvas id="canvas-3d"></canvas>
         
-        <!-- HUD -->
         <div id="hud">
             <div class="hud-item" id="health">❤️ 100</div>
             <div class="hud-item" id="armor">🛡️ 100</div>
@@ -537,87 +360,53 @@
             <div class="hud-item" id="score">🏆 0</div>
         </div>
 
-        <div id="money">💰 $800</div>
+        <div id="team-score">
+            <span class="ct-score">CT 0</span>
+            <span class="tr-score">TR 0</span>
+        </div>
 
+        <div id="timer">01:45</div>
+        <div id="money">💰 $800</div>
         <div id="kill-feed"></div>
 
-        <!-- Radar -->
         <div id="radar">
             <canvas id="radar-canvas" width="150" height="150"></canvas>
         </div>
 
-        <div id="weapon-display">AK-47 | 5.56mm</div>
+        <canvas id="weapon" width="300" height="200"></canvas>
 
-        <!-- Mira -->
         <div id="crosshair">
             <div class="crosshair-line vertical"></div>
             <div class="crosshair-line horizontal"></div>
-            <div class="crosshair-dot"></div>
         </div>
 
-        <!-- Arma na mão -->
-        <canvas id="weapon" width="300" height="200"></canvas>
+        <div id="instructions">WASD=Mover | Clique no jogo=Atirar | ESC=Pausa | R=Recarregar | 1-3=Armas</div>
 
-        <!-- Instruções -->
-        <div id="instructions">WASD = Mover | Clique para travar mouse | ESC = Soltar mouse | R = Recarregar | 1-3 = Trocar arma</div>
-
-        <!-- Botão de pausa -->
         <button id="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
-
-        <!-- Botão reiniciar -->
         <button id="restart-btn" onclick="restartGame()">NOVA PARTIDA</button>
 
-        <!-- Mensagem de kill -->
-        <div id="kill-message">🔫 HEADSHOT!</div>
-
-        <!-- Indicador de pausa -->
+        <div id="kill-message">HEADSHOT!</div>
         <div id="pause-indicator">⏸️ PAUSA</div>
 
-        <!-- Notificação de salvamento -->
-        <div id="save-notification">✅ CONFIGURAÇÕES SALVAS!</div>
-
-        <!-- Aviso de mouse travado -->
         <div id="pointer-lock-info">
-            <p>Clique no jogo para travar o mouse</p>
-            <p>Pressione ESC para soltar</p>
-            <button onclick="requestPointerLock()">ENTENDI</button>
+            <p>🎮 COUNTER-STRIKE 1.6</p>
+            <p>Clique no botão para começar</p>
+            <p>WASD = Mover | Mouse = Mirar</p>
+            <button onclick="requestPointerLock()">✅ ENTRAR NO JOGO</button>
         </div>
 
-        <!-- Menu de pausa -->
         <div id="pause-menu">
             <div class="menu-content">
                 <h2>⚙️ CONFIGURAÇÕES</h2>
                 
-                <div class="menu-section">
-                    <h3>🎮 CONTROLES</h3>
-                    <div class="setting-item">
-                        <label>Sensibilidade <span id="sens-value" class="setting-value">2.0</span></label>
-                        <input type="range" id="mouse-sens" min="0.5" max="5" value="2" step="0.1">
-                    </div>
-                    <div class="setting-item">
-                        <label>Inverter Mouse</label>
-                        <input type="checkbox" id="invert-mouse">
-                    </div>
+                <div class="setting-item">
+                    <label>Sensibilidade <span id="sens-value">2.0</span></label>
+                    <input type="range" id="mouse-sens" min="0.5" max="5" value="2" step="0.1">
                 </div>
-
-                <div class="menu-section">
-                    <h3>🔊 ÁUDIO</h3>
-                    <div class="setting-item">
-                        <label>Volume <span id="volume-value" class="setting-value">70%</span></label>
-                        <input type="range" id="master-volume" min="0" max="100" value="70">
-                    </div>
-                </div>
-
-                <div class="menu-section">
-                    <h3>🎨 VÍDEO</h3>
-                    <div class="setting-item">
-                        <label>Qualidade</label>
-                        <select id="graphics-quality">
-                            <option value="low">Baixa</option>
-                            <option value="medium" selected>Média</option>
-                            <option value="high">Alta</option>
-                        </select>
-                    </div>
+                
+                <div class="setting-item">
+                    <label>Inverter Mouse</label>
+                    <input type="checkbox" id="invert-mouse">
                 </div>
 
                 <div class="menu-buttons">
@@ -630,7 +419,7 @@
     </div>
 
     <script>
-        // ========== CONFIGURAÇÕES ==========
+        // Configuração inicial
         const canvas = document.getElementById('canvas-3d');
         const ctx = canvas.getContext('2d');
         const weaponCanvas = document.getElementById('weapon');
@@ -641,14 +430,12 @@
         const WIDTH = 900;
         const HEIGHT = 600;
         canvas.width = WIDTH;
-        canvas.height = HEIGHT;
+        canvas.height = WEIGHT; // CORRIGIDO: era WEIGHT, agora é HEIGHT
 
-        // Configurações padrão
+        // Configurações
         let settings = {
             mouseSensitivity: 2.0,
-            invertMouse: false,
-            masterVolume: 70,
-            graphicsQuality: 'medium'
+            invertMouse: false
         };
 
         // Jogador
@@ -661,25 +448,22 @@
             armor: 100,
             score: 0,
             money: 800,
+            kills: 0,
             currentWeapon: 'ak47',
             weapons: {
-                ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35, name: 'AK-47' },
-                awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100, name: 'AWP' },
-                pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25, name: 'Glock' }
+                ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35 },
+                awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100 },
+                pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25 }
             }
         };
 
-        // Times
-        const teams = ['CT', 'TR'];
-        let playerTeam = 'CT';
-
-        // Inimigos
-        let enemies = [];
+        // Estado do jogo
+        let gamePaused = false;
+        let gameActive = true;
+        let trScore = 0;
+        let roundTime = 105;
         let lastShot = 0;
-        const SHOT_COOLDOWN = 200; // ms
-
-        // Kill feed
-        let killFeed = [];
+        const keys = {};
 
         // Mapa
         const MAP_SIZE = 16;
@@ -703,47 +487,8 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        // ========== POINTER LOCK (MOUSE TRAVADO) ==========
-        function requestPointerLock() {
-            canvas.requestPointerLock();
-            document.getElementById('pointer-lock-info').style.display = 'none';
-        }
-
-        canvas.addEventListener('click', () => {
-            if (!gamePaused) {
-                requestPointerLock();
-            }
-        });
-
-        document.addEventListener('pointerlockchange', lockChangeAlert);
-        document.addEventListener('mozpointerlockchange', lockChangeAlert);
-        document.addEventListener('webkitpointerlockchange', lockChangeAlert);
-
-        function lockChangeAlert() {
-            if (document.pointerLockElement === canvas) {
-                console.log('Mouse travado');
-                document.addEventListener('mousemove', updateCamera);
-            } else {
-                console.log('Mouse solto');
-                document.removeEventListener('mousemove', updateCamera);
-                document.getElementById('pointer-lock-info').style.display = 'block';
-            }
-        }
-
-        function updateCamera(e) {
-            if (gamePaused || !gameActive) return;
-            
-            const movementX = e.movementX || 0;
-            let angleChange = movementX * settings.mouseSensitivity * 0.002;
-            
-            if (settings.invertMouse) {
-                angleChange = -angleChange;
-            }
-            
-            player.angle += angleChange;
-        }
-
-        // ========== INIMIGOS ==========
+        // Inimigos
+        let enemies = [];
         function loadEnemies() {
             enemies = [];
             for (let y = 0; y < MAP_SIZE; y++) {
@@ -753,11 +498,7 @@
                             x: x * CELL_SIZE + CELL_SIZE/2,
                             y: y * CELL_SIZE + CELL_SIZE/2,
                             health: 100,
-                            armor: 0,
-                            alive: true,
-                            team: 'TR',
-                            type: 'terrorist',
-                            lastShot: 0
+                            alive: true
                         });
                     }
                 }
@@ -765,49 +506,80 @@
         }
         loadEnemies();
 
-        // ========== SISTEMA DE ARMAS ==========
-        function switchWeapon(weapon) {
-            if (player.weapons[weapon]) {
-                player.currentWeapon = weapon;
-                document.getElementById('weapon-icon').innerHTML = `🔫 ${player.weapons[weapon].name}`;
-                updateHUD();
+        // Timer
+        setInterval(() => {
+            if (!gamePaused && gameActive && roundTime > 0) {
+                roundTime--;
+                updateTimer();
             }
+        }, 1000);
+
+        function updateTimer() {
+            const minutes = Math.floor(roundTime / 60);
+            const seconds = roundTime % 60;
+            document.getElementById('timer').innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === '1') switchWeapon('ak47');
-            if (e.key === '2') switchWeapon('awp');
-            if (e.key === '3') switchWeapon('pistol');
-            if (e.key === 'r') reload();
-            if (e.key === 'escape') {
-                document.exitPointerLock();
-                togglePause();
+        // Pointer Lock
+        function requestPointerLock() {
+            canvas.requestPointerLock();
+            document.getElementById('pointer-lock-info').style.display = 'none';
+        }
+
+        document.addEventListener('pointerlockchange', () => {
+            if (document.pointerLockElement === canvas) {
+                document.addEventListener('mousemove', updateCamera);
+            } else {
+                document.removeEventListener('mousemove', updateCamera);
             }
         });
 
-        // ========== TIRO COM RECOIL ==========
+        function updateCamera(e) {
+            if (gamePaused || !gameActive) return;
+            const movementX = e.movementX || 0;
+            let angleChange = movementX * settings.mouseSensitivity * 0.002;
+            if (settings.invertMouse) angleChange = -angleChange;
+            player.angle += angleChange;
+        }
+
+        // Controles
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+            
+            if (e.key === '1') player.currentWeapon = 'ak47';
+            if (e.key === '2') player.currentWeapon = 'awp';
+            if (e.key === '3') player.currentWeapon = 'pistol';
+            if (e.key === 'r') reload();
+            if (e.key === 'Escape') togglePause();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = false;
+        });
+
+        canvas.addEventListener('click', () => {
+            if (!gamePaused && gameActive && document.pointerLockElement === canvas) {
+                shoot();
+            }
+        });
+
+        // Funções do jogo
         function shoot() {
             const now = Date.now();
-            if (now - lastShot < SHOT_COOLDOWN) return;
+            if (now - lastShot < 200) return;
             lastShot = now;
 
             const weapon = player.weapons[player.currentWeapon];
-            if (!weapon || weapon.ammo <= 0) {
+            if (weapon.ammo <= 0) {
                 showKillMessage("SEM MUNIÇÃO!", "#ff4444");
                 return;
             }
 
             weapon.ammo--;
             
-            // Animação e recoil
-            weaponCanvas.classList.add('shoot');
-            setTimeout(() => weaponCanvas.classList.remove('shoot'), 50);
-            
-            // Recoil (arma sobe)
-            player.angle -= 0.02;
-
-            // Raycast do tiro
-            const rayAngle = player.angle;
+            // Raycast
             let hitEnemy = null;
             let hitDist = Infinity;
 
@@ -821,7 +593,7 @@
                 if (dist > 300) return;
                 
                 const angleToEnemy = Math.atan2(dy, dx);
-                let angleDiff = Math.abs(rayAngle - angleToEnemy);
+                let angleDiff = Math.abs(player.angle - angleToEnemy);
                 if (angleDiff > Math.PI) angleDiff = 2*Math.PI - angleDiff;
                 
                 if (angleDiff < 0.1 && dist < hitDist) {
@@ -833,72 +605,35 @@
             });
 
             if (hitEnemy) {
-                // Dano por região
-                const weapon = player.weapons[player.currentWeapon];
-                let damage = weapon.damage;
+                hitEnemy.alive = false;
+                player.score += 100;
+                player.money += 300;
+                player.kills++;
+                trScore++;
                 
-                // Headshot baseado na distância/ângulo
-                const isHeadshot = Math.random() > 0.7;
-                if (isHeadshot) damage *= 2;
+                addKillFeed('CT', 'TR', player.currentWeapon);
+                showKillMessage("+100", "#ffd700");
                 
-                // Reduzir dano pela distância
-                damage *= Math.max(0.5, 1 - hitDist / 500);
-                
-                hitEnemy.health -= damage;
-                
-                // Criar efeito de sangue
-                createBloodEffect(hitEnemy.x, hitEnemy.y);
-                
-                if (hitEnemy.health <= 0) {
-                    hitEnemy.alive = false;
-                    
-                    // Pontuação e dinheiro
-                    const killPoints = isHeadshot ? 150 : 100;
-                    player.score += killPoints;
-                    player.money += 300;
-                    
-                    // Kill feed
-                    addKillFeed(playerTeam, 'TR', player.currentWeapon, isHeadshot);
-                    
-                    showKillMessage(isHeadshot ? "HEADSHOT! +150" : "+100", isHeadshot ? "#ff4444" : "#ffd700");
-                    
-                    // Remover do mapa
-                    const mapX = Math.floor(hitEnemy.x / CELL_SIZE);
-                    const mapY = Math.floor(hitEnemy.y / CELL_SIZE);
-                    if (map[mapY] && map[mapY][mapX] === 2) {
-                        map[mapY][mapX] = 0;
-                    }
-                } else {
-                    showKillMessage(`HIT! ${Math.round(damage)}`, "#ffff44");
-                }
+                document.querySelector('.ct-score').innerHTML = `CT ${player.kills}`;
+                document.querySelector('.tr-score').innerHTML = `TR ${trScore}`;
             }
 
             updateHUD();
         }
 
-        // ========== EFEITOS ==========
-        function createBloodEffect(x, y) {
-            const blood = document.createElement('div');
-            blood.className = 'blood-effect';
-            blood.style.left = (x / CELL_SIZE * (WIDTH/MAP_SIZE)) + 'px';
-            blood.style.top = (y / CELL_SIZE * (HEIGHT/MAP_SIZE)) + 'px';
-            document.getElementById('game-container').appendChild(blood);
-            setTimeout(() => blood.remove(), 500);
+        function wallBetween(x1, y1, x2, y2) {
+            const steps = 10;
+            for (let i = 1; i <= steps; i++) {
+                const t = i / steps;
+                const checkX = x1 + (x2 - x1) * t;
+                const checkY = y1 + (y2 - y1) * t;
+                const mapX = Math.floor(checkX / CELL_SIZE);
+                const mapY = Math.floor(checkY / CELL_SIZE);
+                if (map[mapY] && map[mapY][mapX] === 1) return true;
+            }
+            return false;
         }
 
-        function addKillFeed(killer, victim, weapon, headshot) {
-            const feed = document.getElementById('kill-feed');
-            const item = document.createElement('div');
-            item.className = 'kill-feed-item';
-            item.innerHTML = `${killer} 🔫 ${weapon} ${headshot ? '💀' : ''} ${victim}`;
-            feed.appendChild(item);
-            
-            setTimeout(() => {
-                if (item.parentNode) item.remove();
-            }, 3000);
-        }
-
-        // ========== RECARREGAR ==========
         function reload() {
             const weapon = player.weapons[player.currentWeapon];
             if (weapon.reserve > 0 && weapon.ammo < weapon.maxAmmo) {
@@ -906,26 +641,64 @@
                 const reloadAmount = Math.min(needed, weapon.reserve);
                 weapon.ammo += reloadAmount;
                 weapon.reserve -= reloadAmount;
-                
-                weaponCanvas.classList.add('reload');
-                setTimeout(() => weaponCanvas.classList.remove('reload'), 500);
-                
                 showKillMessage("RECARREGANDO...", "#44ff44");
                 updateHUD();
             }
         }
 
-        // ========== RENDERIZAÇÃO 3D ==========
+        function addKillFeed(killer, victim, weapon) {
+            const feed = document.getElementById('kill-feed');
+            const item = document.createElement('div');
+            item.className = 'kill-feed-item';
+            
+            let weaponName = weapon === 'ak47' ? 'AK47' : weapon === 'awp' ? 'AWP' : 'GLOCK';
+            item.innerHTML = `${killer} [${weaponName}] ${victim}`;
+            feed.appendChild(item);
+            
+            setTimeout(() => item.remove(), 3000);
+        }
+
+        function movePlayer() {
+            if (!gameActive || gamePaused) return;
+            
+            let newX = player.x;
+            let newY = player.y;
+            
+            if (keys['w']) {
+                newX += Math.cos(player.angle) * player.speed;
+                newY += Math.sin(player.angle) * player.speed;
+            }
+            if (keys['s']) {
+                newX -= Math.cos(player.angle) * player.speed;
+                newY -= Math.sin(player.angle) * player.speed;
+            }
+            if (keys['a']) {
+                newX += Math.cos(player.angle - Math.PI/2) * player.speed;
+                newY += Math.sin(player.angle - Math.PI/2) * player.speed;
+            }
+            if (keys['d']) {
+                newX += Math.cos(player.angle + Math.PI/2) * player.speed;
+                newY += Math.sin(player.angle + Math.PI/2) * player.speed;
+            }
+            
+            const mapX = Math.floor(newX / CELL_SIZE);
+            const mapY = Math.floor(newY / CELL_SIZE);
+            
+            if (map[mapY] && map[mapY][mapX] !== 1) {
+                player.x = newX;
+                player.y = newY;
+            }
+        }
+
         function render3D() {
             // Céu e chão
-            ctx.fillStyle = '#87CEEB';
+            ctx.fillStyle = '#0a1a2a';
             ctx.fillRect(0, 0, WIDTH, HEIGHT/2);
-            ctx.fillStyle = '#8B4513';
+            ctx.fillStyle = '#2a3a2a';
             ctx.fillRect(0, HEIGHT/2, WIDTH, HEIGHT/2);
             
             const fov = Math.PI / 3;
-            const numRays = settings.graphicsQuality === 'high' ? WIDTH : WIDTH/2;
-            const pixelSize = WIDTH / numRays;
+            const numRays = 450; // Valor fixo para evitar bugs
             
             for (let i = 0; i < numRays; i++) {
                 const rayAngle = player.angle - fov/2 + (i / numRays) * fov;
@@ -933,7 +706,6 @@
                 let distance = 0;
                 let hit = false;
                 let hitType = 0;
-                let hitEnemy = null;
                 
                 while (!hit && distance < 800) {
                     distance += 5;
@@ -945,22 +717,17 @@
                     
                     if (mapX < 0 || mapX >= MAP_SIZE || mapY < 0 || mapY >= MAP_SIZE) {
                         hit = true;
-                        hitType = 1;
                     } else if (map[mapY][mapX] === 1) {
                         hit = true;
                         hitType = 1;
                     } else {
                         for (let e of enemies) {
                             if (!e.alive) continue;
-                            
                             const dx = rayX - e.x;
                             const dy = rayY - e.y;
-                            const enemyDist = Math.sqrt(dx*dx + dy*dy);
-                            
-                            if (enemyDist < 15) {
+                            if (Math.sqrt(dx*dx + dy*dy) < 15) {
                                 hit = true;
                                 hitType = 2;
-                                hitEnemy = e;
                                 break;
                             }
                         }
@@ -970,61 +737,26 @@
                 const correctDistance = distance * Math.cos(rayAngle - player.angle);
                 const wallHeight = Math.min(HEIGHT, (CELL_SIZE * HEIGHT) / Math.max(correctDistance, 1));
                 
-                const x = i * pixelSize;
+                const x = i * 2; // Pixel size fixo
                 
                 if (hitType === 1) {
-                    // Parede com textura
                     const shade = Math.max(50, 255 - Math.min(200, distance / 2));
                     ctx.fillStyle = `rgb(${shade}, ${shade/2}, ${shade/4})`;
-                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
-                } else if (hitType === 2 && hitEnemy) {
-                    // Inimigo
-                    const shade = Math.max(100, 255 - Math.min(155, distance / 3));
-                    
-                    // Cor baseada no time
-                    if (hitEnemy.team === 'TR') {
-                        ctx.fillStyle = `rgb(${shade}, 50, 50)`;
-                    } else {
-                        ctx.fillStyle = `rgb(50, 50, ${shade})`;
-                    }
-                    
-                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
-                    
-                    // Detalhes do rosto
-                    if (settings.graphicsQuality !== 'low') {
-                        ctx.fillStyle = '#fff';
-                        ctx.fillRect(x + pixelSize/4, HEIGHT/2 - wallHeight/4, 2, 2);
-                        ctx.fillRect(x + 3*pixelSize/4, HEIGHT/2 - wallHeight/4, 2, 2);
-                    }
+                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, 2, wallHeight);
+                } else if (hitType === 2) {
+                    ctx.fillStyle = '#ff4444';
+                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, 2, wallHeight);
                 }
             }
         }
 
-        // ========== RADAR ==========
         function drawRadar() {
             radarCtx.clearRect(0, 0, 150, 150);
-            
-            // Fundo
-            radarCtx.fillStyle = '#0a0f0f';
+            radarCtx.fillStyle = '#0a1f1f';
             radarCtx.fillRect(0, 0, 150, 150);
             
-            // Grid
-            radarCtx.strokeStyle = '#2a4a4a';
-            radarCtx.lineWidth = 0.5;
-            for (let i = 0; i <= 150; i+= 15) {
-                radarCtx.beginPath();
-                radarCtx.moveTo(i, 0);
-                radarCtx.lineTo(i, 150);
-                radarCtx.stroke();
-                
-                radarCtx.beginPath();
-                radarCtx.moveTo(0, i);
-                radarCtx.lineTo(150, i);
-                radarCtx.stroke();
-            }
-            
-            // Paredes
             const cellSize = 150 / MAP_SIZE;
+            
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     if (map[y][x] === 1) {
@@ -1034,133 +766,25 @@
                 }
             }
             
-            // Inimigos vivos
-            enemies.forEach(e => {
-                if (e.alive) {
-                    const dx = e.x - player.x;
-                    const dy = e.y - player.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    
-                    if (dist < 400) { // Mostrar apenas inimigos próximos
-                        const radarX = 75 + (dx / 400) * 60;
-                        const radarY = 75 + (dy / 400) * 60;
-                        
-                        if (radarX > 0 && radarX < 150 && radarY > 0 && radarY < 150) {
-                            radarCtx.fillStyle = '#ff4444';
-                            radarCtx.beginPath();
-                            radarCtx.arc(radarX, radarY, 3, 0, 2*Math.PI);
-                            radarCtx.fill();
-                        }
-                    }
-                }
-            });
-            
             // Jogador
             radarCtx.fillStyle = '#44ff44';
             radarCtx.beginPath();
             radarCtx.arc(75, 75, 4, 0, 2*Math.PI);
             radarCtx.fill();
-            
-            // Direção
-            radarCtx.strokeStyle = '#44ff44';
-            radarCtx.lineWidth = 2;
-            radarCtx.beginPath();
-            radarCtx.moveTo(75, 75);
-            radarCtx.lineTo(75 + Math.cos(player.angle) * 15, 75 + Math.sin(player.angle) * 15);
-            radarCtx.stroke();
         }
 
-        // ========== ARMA NA MÃO ==========
         function drawWeapon() {
             weaponCtx.clearRect(0, 0, 300, 200);
-            
-            const weapon = player.weapons[player.currentWeapon];
-            
-            if (player.currentWeapon === 'ak47') {
-                // AK-47
-                weaponCtx.fillStyle = '#333';
-                weaponCtx.fillRect(150, 150, 100, 20);
-                weaponCtx.fillRect(230, 140, 30, 40);
-                weaponCtx.fillStyle = '#666';
-                weaponCtx.fillRect(100, 140, 60, 40);
-                weaponCtx.fillStyle = '#222';
-                weaponCtx.fillRect(250, 145, 40, 10);
-                weaponCtx.fillStyle = '#ffd700';
-                weaponCtx.fillRect(200, 130, 5, 5);
-            } else if (player.currentWeapon === 'awp') {
-                // AWP
-                weaponCtx.fillStyle = '#2a4a4a';
-                weaponCtx.fillRect(120, 150, 150, 15);
-                weaponCtx.fillRect(250, 140, 30, 35);
-                weaponCtx.fillStyle = '#5a5a5a';
-                weaponCtx.fillRect(100, 140, 40, 40);
-                weaponCtx.fillStyle = '#222';
-                weaponCtx.fillRect(260, 145, 30, 5);
-            } else {
-                // Pistola
-                weaponCtx.fillStyle = '#444';
-                weaponCtx.fillRect(200, 150, 60, 15);
-                weaponCtx.fillRect(180, 140, 30, 25);
-                weaponCtx.fillStyle = '#666';
-                weaponCtx.fillRect(150, 140, 30, 30);
-            }
-        }
-
-        // ========== UTILITÁRIOS ==========
-        function wallBetween(x1, y1, x2, y2) {
-            const steps = 10;
-            for (let i = 1; i <= steps; i++) {
-                const t = i / steps;
-                const checkX = x1 + (x2 - x1) * t;
-                const checkY = y1 + (y2 - y1) * t;
-                
-                const mapX = Math.floor(checkX / CELL_SIZE);
-                const mapY = Math.floor(checkY / CELL_SIZE);
-                
-                if (map[mapY] && map[mapY][mapX] === 1) return true;
-            }
-            return false;
-        }
-
-        function movePlayer() {
-            if (!gameActive || gamePaused) return;
-            
-            const moveSpeed = player.speed;
-            let newX = player.x;
-            let newY = player.y;
-            
-            if (keys['w']) {
-                newX += Math.cos(player.angle) * moveSpeed;
-                newY += Math.sin(player.angle) * moveSpeed;
-            }
-            if (keys['s']) {
-                newX -= Math.cos(player.angle) * moveSpeed;
-                newY -= Math.sin(player.angle) * moveSpeed;
-            }
-            if (keys['a']) {
-                newX += Math.cos(player.angle - Math.PI/2) * moveSpeed;
-                newY += Math.sin(player.angle - Math.PI/2) * moveSpeed;
-            }
-            if (keys['d']) {
-                newX += Math.cos(player.angle + Math.PI/2) * moveSpeed;
-                newY += Math.sin(player.angle + Math.PI/2) * moveSpeed;
-            }
-            
-            const mapX = Math.floor(newX / CELL_SIZE);
-            const mapY = Math.floor(newY / CELL_SIZE);
-            
-            if (map[mapY] && map[mapY][mapX] !== 1) {
-                player.x = newX;
-                player.y = newY;
-            }
-            
-            player.x = Math.max(CELL_SIZE/2, Math.min(CELL_SIZE * MAP_SIZE - CELL_SIZE/2, player.x));
-            player.y = Math.max(CELL_SIZE/2, Math.min(CELL_SIZE * MAP_SIZE - CELL_SIZE/2, player.y));
+            weaponCtx.fillStyle = '#333';
+            weaponCtx.fillRect(150, 150, 100, 15);
+            weaponCtx.fillRect(230, 140, 25, 30);
+            weaponCtx.fillStyle = '#666';
+            weaponCtx.fillRect(100, 140, 50, 30);
         }
 
         function updateHUD() {
             const weapon = player.weapons[player.currentWeapon];
-            document.getElementById('health').innerHTML = `❤️ ${Math.max(0, Math.round(player.health))}`;
+            document.getElementById('health').innerHTML = `❤️ ${player.health}`;
             document.getElementById('armor').innerHTML = `🛡️ ${player.armor}`;
             document.getElementById('ammo').innerHTML = `${weapon.ammo}/${weapon.reserve}`;
             document.getElementById('score').innerHTML = `🏆 ${player.score}`;
@@ -1175,53 +799,23 @@
             setTimeout(() => msg.classList.remove('show'), 800);
         }
 
-        // ========== ESTADO DO JOGO ==========
-        let gamePaused = false;
-        let gameActive = true;
-        const keys = {};
-
-        document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
-        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-        
-        canvas.addEventListener('click', () => {
-            if (!gamePaused && gameActive) shoot();
-        });
-
-        // ========== PAUSA E CONFIGURAÇÕES ==========
         function togglePause() {
             gamePaused = !gamePaused;
             document.getElementById('pause-menu').style.display = gamePaused ? 'flex' : 'none';
             document.getElementById('pause-indicator').style.display = gamePaused ? 'block' : 'none';
-            
-            if (gamePaused) {
-                document.exitPointerLock();
-            }
         }
 
         function saveSettings() {
             settings.mouseSensitivity = parseFloat(document.getElementById('mouse-sens').value);
             settings.invertMouse = document.getElementById('invert-mouse').checked;
-            settings.masterVolume = parseInt(document.getElementById('master-volume').value);
-            settings.graphicsQuality = document.getElementById('graphics-quality').value;
-            
             document.getElementById('sens-value').textContent = settings.mouseSensitivity.toFixed(1);
-            document.getElementById('volume-value').textContent = settings.masterVolume + '%';
-            
-            showSaveNotification();
             togglePause();
         }
 
         function resetToDefaults() {
             document.getElementById('mouse-sens').value = 2.0;
             document.getElementById('invert-mouse').checked = false;
-            document.getElementById('master-volume').value = 70;
-            document.getElementById('graphics-quality').value = 'medium';
-        }
-
-        function showSaveNotification() {
-            const notif = document.getElementById('save-notification');
-            notif.style.display = 'block';
-            setTimeout(() => notif.style.display = 'none', 2000);
+            document.getElementById('sens-value').textContent = '2.0';
         }
 
         function restartGame() {
@@ -1234,50 +828,49 @@
                 armor: 100,
                 score: 0,
                 money: 800,
+                kills: 0,
                 currentWeapon: 'ak47',
                 weapons: {
-                    ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35, name: 'AK-47' },
-                    awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100, name: 'AWP' },
-                    pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25, name: 'Glock' }
+                    ak47: { ammo: 30, reserve: 90, maxAmmo: 30, damage: 35 },
+                    awp: { ammo: 10, reserve: 30, maxAmmo: 10, damage: 100 },
+                    pistol: { ammo: 12, reserve: 48, maxAmmo: 12, damage: 25 }
                 }
             };
             
-            const newMap = JSON.parse(JSON.stringify(mapTemplate));
-            for (let y = 0; y < MAP_SIZE; y++) {
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    map[y][x] = newMap[y][x];
-                }
-            }
-            
+            trScore = 0;
+            roundTime = 105;
             loadEnemies();
-            gameActive = true;
-            if (gamePaused) togglePause();
+            
+            document.querySelector('.ct-score').innerHTML = `CT 0`;
+            document.querySelector('.tr-score').innerHTML = `TR 0`;
+            updateTimer();
             updateHUD();
+            
+            if (gamePaused) togglePause();
         }
 
-        const mapTemplate = JSON.parse(JSON.stringify(map));
-
-        // ========== GAME LOOP ==========
         function gameLoop() {
             if (gameActive && !gamePaused) {
                 movePlayer();
             }
-            
             render3D();
             drawWeapon();
             drawRadar();
-            
             requestAnimationFrame(gameLoop);
         }
 
         // Inicialização
         updateHUD();
+        updateTimer();
         gameLoop();
 
-        // Mostrar info de mouse lock
         setTimeout(() => {
-            document.getElementById('pointer-lock-info').style.display = 'block';
+            if (document.pointerLockElement !== canvas) {
+                document.getElementById('pointer-lock-info').style.display = 'block';
+            }
         }, 1000);
+
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     </script>
 </body>
 </html>
