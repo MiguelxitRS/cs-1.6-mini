@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS 1.6 MOD - Aim.cfg Edition</title>
+    <title>CS 1.6 MOD - Sprite Edition</title>
     <style>
+        /* ... (seus estilos permanecem EXATAMENTE os mesmos) ... */
         * {
             margin: 0;
             padding: 0;
@@ -186,7 +187,6 @@
             pointer-events: none;
         }
 
-        /* Mira estilo Aim.cfg (colorida) */
         .crosshair-line {
             position: absolute;
             background: #44ff88;
@@ -520,7 +520,7 @@
     </div>
 
     <script>
-        // Configuração inicial
+        // ========== CONFIGURAÇÃO INICIAL ==========
         const canvas = document.getElementById('canvas-3d');
         const ctx = canvas.getContext('2d');
         const weaponCanvas = document.getElementById('weapon-canvas');
@@ -549,6 +549,10 @@
             weaponSkin: 'default'
         };
 
+        // Timer
+        let roundTime = 105;
+        let timerInterval = null;
+
         // Jogador
         let player = {
             x: 400,
@@ -567,7 +571,7 @@
             }
         };
 
-        // Inimigos
+        // Inimigos (agora com sprites de bonecos)
         let enemies = [];
         let lastShot = 0;
         const SHOT_COOLDOWN = 120;
@@ -599,30 +603,62 @@
 
         const mapTemplate = JSON.parse(JSON.stringify(map));
 
-        // ===== FUNÇÕES DE CONFIGURAÇÃO =====
-        function updateSens(value) {
-            config.sens = parseFloat(value);
-            document.getElementById('sens-value').innerHTML = value;
+        // ===== FUNÇÃO DO SPRITE DETALHADO (INIMIGO 2D) =====
+        function drawEnemySprite(ctx, x, y, size, color, isHit) {
+            // Ajusta a cor se foi atingido
+            const drawColor = isHit ? '#ffffff' : color;
+            
+            // Cabeça (formato de capacete)
+            ctx.fillStyle = drawColor;
+            ctx.beginPath();
+            ctx.ellipse(x, y - size*0.4, size*0.2, size*0.25, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Capacete (detalhe)
+            ctx.fillStyle = '#555';
+            ctx.beginPath();
+            ctx.ellipse(x, y - size*0.5, size*0.18, size*0.12, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Olhos (se for headshot ou apenas para detalhe)
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(x - 3, y - size*0.45, 1, 0, 2*Math.PI);
+            ctx.arc(x + 3, y - size*0.45, 1, 0, 2*Math.PI);
+            ctx.fill();
+            
+            // Corpo (colete)
+            ctx.fillStyle = drawColor;
+            ctx.fillRect(x - size*0.2, y - size*0.15, size*0.4, size*0.3);
+            
+            // Detalhe do colete
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x - size*0.18, y - size*0.13, size*0.36, size*0.26);
+            
+            // Braço esquerdo
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(x - size*0.3, y - size*0.1, size*0.1, size*0.2);
+            
+            // Braço direito (segurando arma)
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(x + size*0.2, y - size*0.1, size*0.1, size*0.2);
+            
+            // Arma (AK-47 estilizada)
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x + size*0.2, y - size*0.05, size*0.25, size*0.04);
+            ctx.fillRect(x + size*0.4, y - size*0.07, size*0.1, size*0.08);
+            
+            // Perna esquerda
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x - size*0.15, y + size*0.15, size*0.1, size*0.2);
+            
+            // Perna direita
+            ctx.fillStyle = '#222';
+            ctx.fillRect(x + size*0.05, y + size*0.15, size*0.1, size*0.2);
         }
 
-        function updateCrosshairColor(color) {
-            config.crosshairColor = color;
-            document.querySelector('.crosshair-line.vertical').style.background = '#ff44ff';
-            document.querySelector('.crosshair-line.horizontal').style.background = color;
-            document.querySelector('.crosshair-dot').style.background = color;
-        }
-
-        function updatePlayerSkin(skin) {
-            config.playerSkin = skin;
-            loadEnemies();
-        }
-
-        function updateWeaponSkin(skin) {
-            config.weaponSkin = skin;
-            drawWeapon();
-        }
-
-        // ===== SKINS =====
+        // ===== FUNÇÕES DE SKINS =====
         function getEnemyColor(team) {
             switch(config.playerSkin) {
                 case 'blue': return '#44aaff';
@@ -643,7 +679,8 @@
                             health: 100,
                             alive: true,
                             team: 'TR',
-                            skin: getEnemyColor('TR')
+                            skin: getEnemyColor('TR'),
+                            lastHit: 0
                         });
                     }
                 }
@@ -657,7 +694,6 @@
             
             const skin = config.weaponSkin;
             
-            // Corpo da arma
             if (skin === 'blue') {
                 weaponCtx.fillStyle = '#2a6f9c';
                 weaponCtx.fillRect(150, 150, 120, 20);
@@ -688,11 +724,57 @@
                 weaponCtx.fillRect(100, 140, 60, 40);
             }
             
-            // Detalhes
             weaponCtx.fillStyle = '#ffd700';
             weaponCtx.fillRect(200, 130, 8, 8);
             weaponCtx.fillStyle = '#222';
             weaponCtx.fillRect(260, 145, 25, 8);
+        }
+
+        // ===== FUNÇÕES DO TIMER =====
+        function iniciarTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (gameActive && !gamePaused && roundTime > 0) {
+                    roundTime--;
+                    atualizarTimer();
+                    
+                    if (roundTime === 0) {
+                        document.getElementById('timer').innerHTML = "00:00";
+                        showDamage("FIM DE RODADA!", "#ff4444");
+                    }
+                }
+            }, 1000);
+        }
+
+        function atualizarTimer() {
+            const minutes = Math.floor(roundTime / 60);
+            const seconds = roundTime % 60;
+            document.getElementById('timer').innerHTML = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // ===== FUNÇÕES DE CONFIGURAÇÃO =====
+        function updateSens(value) {
+            config.sens = parseFloat(value);
+            document.getElementById('sens-value').innerHTML = value;
+        }
+
+        function updateCrosshairColor(color) {
+            config.crosshairColor = color;
+            document.querySelector('.crosshair-line.vertical').style.background = '#ff44ff';
+            document.querySelector('.crosshair-line.horizontal').style.background = color;
+            document.querySelector('.crosshair-dot').style.background = color;
+        }
+
+        function updatePlayerSkin(skin) {
+            config.playerSkin = skin;
+            loadEnemies();
+        }
+
+        function updateWeaponSkin(skin) {
+            config.weaponSkin = skin;
+            drawWeapon();
         }
 
         // ===== FUNÇÕES DO JOGO =====
@@ -700,6 +782,9 @@
             document.getElementById('menu-overlay').style.display = 'none';
             gameActive = true;
             gamePaused = false;
+            roundTime = 105;
+            atualizarTimer();
+            iniciarTimer();
             canvas.requestPointerLock();
         }
 
@@ -712,7 +797,6 @@
         }
 
         function resetGame() {
-            // Resetar jogador
             player = {
                 x: 400,
                 y: 400,
@@ -730,7 +814,6 @@
                 }
             };
             
-            // Resetar estatísticas
             stats = {
                 kills: 0,
                 headshots: 0,
@@ -738,7 +821,10 @@
                 shotsHit: 0
             };
             
-            // Resetar mapa e inimigos
+            roundTime = 105;
+            atualizarTimer();
+            if (timerInterval) clearInterval(timerInterval);
+            
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     map[y][x] = mapTemplate[y][x];
@@ -777,9 +863,11 @@
             if (e.key === 'Escape') {
                 if (document.pointerLockElement === canvas) {
                     document.exitPointerLock();
+                    gamePaused = true;
                 } else {
                     document.getElementById('menu-overlay').style.display = 'flex';
                     gameActive = false;
+                    if (timerInterval) clearInterval(timerInterval);
                 }
             }
         });
@@ -795,7 +883,7 @@
             }
         });
 
-        // ===== TIRO CORRIGIDO =====
+        // ===== TIRO =====
         function shoot() {
             const now = Date.now();
             if (now - lastShot < SHOT_COOLDOWN) return;
@@ -810,14 +898,11 @@
             weapon.ammo--;
             stats.shotsFired++;
             
-            // Atualizar contador de tiros na tela
             document.getElementById('tiros').innerHTML = stats.shotsFired;
             
-            // Animação
             document.getElementById('weapon').classList.add('shoot');
             setTimeout(() => document.getElementById('weapon').classList.remove('shoot'), 80);
 
-            // Raycast
             const rayAngle = player.angle;
             let hitEnemy = null;
             let hitDist = Infinity;
@@ -859,8 +944,8 @@
                 damage *= Math.max(0.6, 1 - hitDist / 600);
                 
                 hitEnemy.health -= damage;
+                hitEnemy.lastHit = now;
                 
-                // Efeitos
                 document.getElementById('blood-overlay').classList.add('hit');
                 setTimeout(() => document.getElementById('blood-overlay').classList.remove('hit'), 100);
                 
@@ -875,7 +960,6 @@
                     player.kills++;
                     stats.kills++;
                     
-                    // Atualizar kills na tela
                     document.getElementById('kills').innerHTML = stats.kills;
                     
                     addKillFeed('CT', 'TR', player.currentWeapon, isHeadshot);
@@ -984,11 +1068,27 @@
         }
 
         function render3D() {
-            // Céu
-            ctx.fillStyle = '#0f1217';
+            // Céu com gradiente
+            const gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT/2);
+            gradient.addColorStop(0, '#0a1a2a');
+            gradient.addColorStop(1, '#1a2a3a');
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, WIDTH, HEIGHT/2);
-            ctx.fillStyle = '#1a1f2a';
+            
+            // Chão
+            ctx.fillStyle = '#2a3a2a';
             ctx.fillRect(0, HEIGHT/2, WIDTH, HEIGHT/2);
+            
+            // Linhas do chão
+            ctx.strokeStyle = '#3a4a3a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < WIDTH; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, HEIGHT/2);
+                ctx.lineTo(i + 30, HEIGHT);
+                ctx.strokeStyle = '#3a4a3a';
+                ctx.stroke();
+            }
             
             const fov = Math.PI / 2.8;
             const numRays = 512;
@@ -1000,6 +1100,7 @@
                 let distance = 0;
                 let hit = false;
                 let hitEnemy = null;
+                let hitSide = '';
                 
                 while (!hit && distance < 1000) {
                     distance += 5;
@@ -1013,12 +1114,21 @@
                         hit = true;
                     } else if (map[mapY][mapX] === 1) {
                         hit = true;
+                        // Determinar qual lado da parede foi atingido
+                        const dx = rayX - (mapX * CELL_SIZE + CELL_SIZE/2);
+                        const dy = rayY - (mapY * CELL_SIZE + CELL_SIZE/2);
+                        if (Math.abs(dx) > Math.abs(dy)) {
+                            hitSide = dx > 0 ? 'right' : 'left';
+                        } else {
+                            hitSide = dy > 0 ? 'bottom' : 'top';
+                        }
                     } else {
                         for (let e of enemies) {
                             if (!e.alive) continue;
                             const dx = rayX - e.x;
                             const dy = rayY - e.y;
-                            if (Math.sqrt(dx*dx + dy*dy) < 18) {
+                            const enemyDist = Math.sqrt(dx*dx + dy*dy);
+                            if (enemyDist < 18) {
                                 hit = true;
                                 hitEnemy = e;
                                 break;
@@ -1033,12 +1143,36 @@
                 const x = i * pixelSize;
                 
                 if (hitEnemy) {
-                    ctx.fillStyle = hitEnemy.skin;
-                    ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
+                    // Desenhar sprite do inimigo
+                    const screenX = x + pixelSize/2;
+                    const screenY = HEIGHT/2;
+                    const size = wallHeight * 1.2;
+                    
+                    drawEnemySprite(
+                        ctx, 
+                        screenX, 
+                        screenY, 
+                        size, 
+                        hitEnemy.skin,
+                        Date.now() - hitEnemy.lastHit < 100
+                    );
                 } else if (hit) {
+                    // Desenhar parede com textura
                     const shade = Math.max(40, 255 - Math.min(215, distance / 1.8));
-                    ctx.fillStyle = `rgb(${shade-20}, ${shade/2}, ${shade/4})`;
+                    let wallColor;
+                    if (hitSide === 'left' || hitSide === 'right') {
+                        wallColor = `rgb(${shade-30}, ${shade/2-10}, ${shade/4-5})`;
+                    } else {
+                        wallColor = `rgb(${shade-20}, ${shade/2}, ${shade/4})`;
+                    }
+                    ctx.fillStyle = wallColor;
                     ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize, wallHeight);
+                    
+                    // Adicionar detalhes de textura
+                    if (i % 4 === 0) {
+                        ctx.fillStyle = `rgba(0,0,0,0.2)`;
+                        ctx.fillRect(x, HEIGHT/2 - wallHeight/2, pixelSize/2, wallHeight);
+                    }
                 }
             }
         }
@@ -1048,12 +1182,26 @@
             radarCtx.fillStyle = '#0f172a';
             radarCtx.fillRect(0, 0, 180, 180);
             
+            // Grid do radar
+            radarCtx.strokeStyle = '#2a4a4a';
+            radarCtx.lineWidth = 1;
+            for (let i = 0; i <= 180; i += 30) {
+                radarCtx.beginPath();
+                radarCtx.moveTo(i, 0);
+                radarCtx.lineTo(i, 180);
+                radarCtx.stroke();
+                radarCtx.beginPath();
+                radarCtx.moveTo(0, i);
+                radarCtx.lineTo(180, i);
+                radarCtx.stroke();
+            }
+            
             const cellSize = 180 / MAP_SIZE;
             
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
                     if (map[y][x] === 1) {
-                        radarCtx.fillStyle = '#5a4e3e';
+                        radarCtx.fillStyle = '#8b6b4d';
                         radarCtx.fillRect(x * cellSize, y * cellSize, cellSize - 1, cellSize - 1);
                     }
                 }
@@ -1099,7 +1247,6 @@
             document.getElementById('ammo').innerHTML = `${weapon.ammo}/${weapon.reserve}`;
             document.getElementById('score').innerHTML = `🏆 ${player.score}`;
             
-            // Atualizar estatísticas
             document.getElementById('kills').innerHTML = stats.kills;
             document.getElementById('headshots').innerHTML = stats.headshots;
             document.getElementById('tiros').innerHTML = stats.shotsFired;
@@ -1124,7 +1271,6 @@
             drawRadar();
             updateHUD();
             
-            // FPS counter
             frames++;
             const now = performance.now();
             const delta = now - lastTime;
@@ -1138,7 +1284,6 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Inicialização
         drawWeapon();
         updateHUD();
         gameLoop();
