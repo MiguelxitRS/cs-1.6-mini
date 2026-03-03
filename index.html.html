@@ -500,26 +500,38 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: #ffd700;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
-            border: 2px solid #ffd700;
+            border: 3px solid #ffd700;
             font-size: 18px;
             text-align: center;
             z-index: 1000;
             display: none;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
+        }
+
+        #pointer-lock-info p {
+            margin: 10px 0;
         }
 
         #pointer-lock-info button {
-            margin-top: 15px;
-            padding: 8px 20px;
+            margin-top: 20px;
+            padding: 12px 30px;
             background: #ffd700;
             color: #000;
             border: none;
             border-radius: 4px;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #pointer-lock-info button:hover {
+            background: #ffed4a;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -559,7 +571,7 @@
         <canvas id="weapon" width="300" height="200"></canvas>
 
         <!-- Instruções -->
-        <div id="instructions">WASD = Mover | Clique para travar mouse | ESC = Soltar mouse | R = Recarregar | 1-3 = Trocar arma</div>
+        <div id="instructions">WASD = Mover | Clique no jogo para travar mouse | ESC = Soltar mouse | R = Recarregar | 1-3 = Trocar arma</div>
 
         <!-- Botão de pausa -->
         <button id="pause-btn" onclick="togglePause()">⏸️ PAUSA</button>
@@ -578,9 +590,10 @@
 
         <!-- Aviso de mouse travado -->
         <div id="pointer-lock-info">
-            <p>Clique no jogo para travar o mouse</p>
-            <p>Pressione ESC para soltar</p>
-            <button onclick="requestPointerLock()">ENTENDI</button>
+            <p>🎮 CONTROLE DO MOUSE</p>
+            <p>Clique no botão abaixo para travar o mouse no jogo</p>
+            <p>Pressione ESC a qualquer momento para soltar</p>
+            <button onclick="requestPointerLock()">✅ TRAVAR MOUSE</button>
         </div>
 
         <!-- Menu de pausa -->
@@ -703,47 +716,12 @@
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        // ========== POINTER LOCK (MOUSE TRAVADO) ==========
-        function requestPointerLock() {
-            canvas.requestPointerLock();
-            document.getElementById('pointer-lock-info').style.display = 'none';
-        }
+        // Template do mapa para reiniciar
+        const mapTemplate = JSON.parse(JSON.stringify(map));
 
-        canvas.addEventListener('click', () => {
-            if (!gamePaused) {
-                requestPointerLock();
-            }
-        });
+        // ========== FUNÇÕES PRINCIPAIS ==========
 
-        document.addEventListener('pointerlockchange', lockChangeAlert);
-        document.addEventListener('mozpointerlockchange', lockChangeAlert);
-        document.addEventListener('webkitpointerlockchange', lockChangeAlert);
-
-        function lockChangeAlert() {
-            if (document.pointerLockElement === canvas) {
-                console.log('Mouse travado');
-                document.addEventListener('mousemove', updateCamera);
-            } else {
-                console.log('Mouse solto');
-                document.removeEventListener('mousemove', updateCamera);
-                document.getElementById('pointer-lock-info').style.display = 'block';
-            }
-        }
-
-        function updateCamera(e) {
-            if (gamePaused || !gameActive) return;
-            
-            const movementX = e.movementX || 0;
-            let angleChange = movementX * settings.mouseSensitivity * 0.002;
-            
-            if (settings.invertMouse) {
-                angleChange = -angleChange;
-            }
-            
-            player.angle += angleChange;
-        }
-
-        // ========== INIMIGOS ==========
+        // Carregar inimigos
         function loadEnemies() {
             enemies = [];
             for (let y = 0; y < MAP_SIZE; y++) {
@@ -765,27 +743,88 @@
         }
         loadEnemies();
 
+        // ========== POINTER LOCK (MOUSE TRAVADO) ==========
+        function requestPointerLock() {
+            canvas.requestPointerLock();
+            document.getElementById('pointer-lock-info').style.display = 'none';
+        }
+
+        // Evento de clique no canvas para travar mouse
+        canvas.addEventListener('click', () => {
+            if (!gamePaused && document.pointerLockElement !== canvas) {
+                requestPointerLock();
+            }
+        });
+
+        // Detectar mudança no pointer lock
+        document.addEventListener('pointerlockchange', lockChange);
+        document.addEventListener('mozpointerlockchange', lockChange);
+        document.addEventListener('webkitpointerlockchange', lockChange);
+
+        function lockChange() {
+            if (document.pointerLockElement === canvas) {
+                console.log('Mouse travado');
+                document.addEventListener('mousemove', updateCamera);
+                document.getElementById('pointer-lock-info').style.display = 'none';
+            } else {
+                console.log('Mouse solto');
+                document.removeEventListener('mousemove', updateCamera);
+                // Só mostrar a mensagem se o jogo não estiver pausado
+                if (!gamePaused && gameActive) {
+                    document.getElementById('pointer-lock-info').style.display = 'block';
+                }
+            }
+        }
+
+        // Atualizar câmera com movimento do mouse
+        function updateCamera(e) {
+            if (gamePaused || !gameActive) return;
+            
+            const movementX = e.movementX || 0;
+            let angleChange = movementX * settings.mouseSensitivity * 0.002;
+            
+            if (settings.invertMouse) {
+                angleChange = -angleChange;
+            }
+            
+            player.angle += angleChange;
+        }
+
         // ========== SISTEMA DE ARMAS ==========
         function switchWeapon(weapon) {
             if (player.weapons[weapon]) {
                 player.currentWeapon = weapon;
                 document.getElementById('weapon-icon').innerHTML = `🔫 ${player.weapons[weapon].name}`;
+                document.getElementById('weapon-display').innerHTML = `${player.weapons[weapon].name} | 5.56mm`;
                 updateHUD();
             }
         }
 
+        // Eventos de teclado
         document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = true;
+            
             if (e.key === '1') switchWeapon('ak47');
             if (e.key === '2') switchWeapon('awp');
             if (e.key === '3') switchWeapon('pistol');
             if (e.key === 'r') reload();
-            if (e.key === 'escape') {
-                document.exitPointerLock();
-                togglePause();
+            if (e.key === 'Escape') {
+                // Se o mouse estiver travado, soltar
+                if (document.pointerLockElement === canvas) {
+                    document.exitPointerLock();
+                } else {
+                    togglePause();
+                }
             }
         });
 
-        // ========== TIRO COM RECOIL ==========
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            keys[key] = false;
+        });
+
+        // ========== TIRO ==========
         function shoot() {
             const now = Date.now();
             if (now - lastShot < SHOT_COOLDOWN) return;
@@ -880,8 +919,13 @@
         function createBloodEffect(x, y) {
             const blood = document.createElement('div');
             blood.className = 'blood-effect';
-            blood.style.left = (x / CELL_SIZE * (WIDTH/MAP_SIZE)) + 'px';
-            blood.style.top = (y / CELL_SIZE * (HEIGHT/MAP_SIZE)) + 'px';
+            
+            // Converter coordenadas do mundo para tela (aproximado)
+            const screenX = (x / (CELL_SIZE * MAP_SIZE)) * WIDTH;
+            const screenY = (y / (CELL_SIZE * MAP_SIZE)) * HEIGHT;
+            
+            blood.style.left = screenX + 'px';
+            blood.style.top = screenY + 'px';
             document.getElementById('game-container').appendChild(blood);
             setTimeout(() => blood.remove(), 500);
         }
@@ -890,7 +934,13 @@
             const feed = document.getElementById('kill-feed');
             const item = document.createElement('div');
             item.className = 'kill-feed-item';
-            item.innerHTML = `${killer} 🔫 ${weapon} ${headshot ? '💀' : ''} ${victim}`;
+            
+            let weaponName = '';
+            if (weapon === 'ak47') weaponName = 'AK-47';
+            else if (weapon === 'awp') weaponName = 'AWP';
+            else weaponName = 'Glock';
+            
+            item.innerHTML = `${killer} 🔫 ${weaponName} ${headshot ? '💀' : ''} ${victim}`;
             feed.appendChild(item);
             
             setTimeout(() => {
@@ -1180,21 +1230,29 @@
         let gameActive = true;
         const keys = {};
 
-        document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
-        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-        
+        // Evento de tiro (clique no canvas)
         canvas.addEventListener('click', () => {
-            if (!gamePaused && gameActive) shoot();
+            if (!gamePaused && gameActive && document.pointerLockElement === canvas) {
+                shoot();
+            }
         });
 
         // ========== PAUSA E CONFIGURAÇÕES ==========
         function togglePause() {
             gamePaused = !gamePaused;
-            document.getElementById('pause-menu').style.display = gamePaused ? 'flex' : 'none';
-            document.getElementById('pause-indicator').style.display = gamePaused ? 'block' : 'none';
+            const pauseMenu = document.getElementById('pause-menu');
+            const pauseIndicator = document.getElementById('pause-indicator');
             
             if (gamePaused) {
-                document.exitPointerLock();
+                pauseMenu.style.display = 'flex';
+                pauseIndicator.style.display = 'block';
+                // Se o mouse estiver travado, soltar ao pausar
+                if (document.pointerLockElement === canvas) {
+                    document.exitPointerLock();
+                }
+            } else {
+                pauseMenu.style.display = 'none';
+                pauseIndicator.style.display = 'none';
             }
         }
 
@@ -1216,6 +1274,9 @@
             document.getElementById('invert-mouse').checked = false;
             document.getElementById('master-volume').value = 70;
             document.getElementById('graphics-quality').value = 'medium';
+            
+            document.getElementById('sens-value').textContent = '2.0';
+            document.getElementById('volume-value').textContent = '70%';
         }
 
         function showSaveNotification() {
@@ -1242,10 +1303,10 @@
                 }
             };
             
-            const newMap = JSON.parse(JSON.stringify(mapTemplate));
+            // Restaurar mapa
             for (let y = 0; y < MAP_SIZE; y++) {
                 for (let x = 0; x < MAP_SIZE; x++) {
-                    map[y][x] = newMap[y][x];
+                    map[y][x] = mapTemplate[y][x];
                 }
             }
             
@@ -1253,9 +1314,8 @@
             gameActive = true;
             if (gamePaused) togglePause();
             updateHUD();
+            showKillMessage("NOVA PARTIDA", "#44ff44");
         }
-
-        const mapTemplate = JSON.parse(JSON.stringify(map));
 
         // ========== GAME LOOP ==========
         function gameLoop() {
@@ -1274,10 +1334,15 @@
         updateHUD();
         gameLoop();
 
-        // Mostrar info de mouse lock
+        // Mostrar info de mouse lock após 1 segundo
         setTimeout(() => {
-            document.getElementById('pointer-lock-info').style.display = 'block';
+            if (document.pointerLockElement !== canvas) {
+                document.getElementById('pointer-lock-info').style.display = 'block';
+            }
         }, 1000);
+
+        // Prevenir menu de contexto no canvas
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
     </script>
 </body>
 </html>
