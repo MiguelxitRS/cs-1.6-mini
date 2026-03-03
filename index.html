@@ -670,6 +670,77 @@
         }
 
         // ===== FUNÇÕES DO JOGO =====
+        // Adicione esta função no seu código (entre as outras funções)
+
+// Timer funcionando corretamente
+let roundTime = 105; // 1:45 em segundos
+let timerInterval;
+
+function iniciarTimer() {
+    // Parar timer anterior se existir
+    if (timerInterval) clearInterval(timerInterval);
+    
+    timerInterval = setInterval(() => {
+        if (gameActive && !gamePaused && roundTime > 0) {
+            roundTime--;
+            atualizarTimer();
+            
+            // Quando chegar a zero
+            if (roundTime === 0) {
+                document.getElementById('timer').innerHTML = "00:00";
+                showDamage("FIM DE RODADA!", "#ff4444");
+            }
+        }
+    }, 1000);
+}
+
+function atualizarTimer() {
+    const minutes = Math.floor(roundTime / 60);
+    const seconds = roundTime % 60;
+    document.getElementById('timer').innerHTML = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Modifique a função startGame() para incluir:
+function startGame() {
+    document.getElementById('menu-overlay').style.display = 'none';
+    gameActive = true;
+    gamePaused = false;
+    roundTime = 105; // Resetar timer
+    atualizarTimer(); // Mostrar timer atualizado
+    iniciarTimer(); // Iniciar contagem
+    canvas.requestPointerLock();
+}
+
+// Modifique a função resetGame() para incluir:
+function resetGame() {
+    // ... (todo o código existente)
+    
+    // Resetar timer
+    roundTime = 105;
+    atualizarTimer();
+    if (timerInterval) clearInterval(timerInterval);
+    
+    // ... (resto do código)
+}
+
+// Modifique a função togglePause (se existir) ou crie uma:
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        if (document.pointerLockElement === canvas) {
+            document.exitPointerLock();
+            gamePaused = true;
+            // Timer continua rodando em fundo ou pausa? Vou pausar:
+            // Se quiser pausar o timer, descomente a linha abaixo:
+            // if (timerInterval) clearInterval(timerInterval);
+        } else {
+            document.getElementById('menu-overlay').style.display = 'flex';
+            gameActive = false;
+            if (timerInterval) clearInterval(timerInterval);
+        }
+    }
+});
+
         function startGame() {
             document.getElementById('menu-overlay').style.display = 'none';
             gameActive = true;
